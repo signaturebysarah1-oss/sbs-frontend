@@ -10,6 +10,7 @@ import {
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
+import Container from "../shared/Container";
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -27,7 +28,7 @@ const Header = () => {
 
   const navLinks = [
     { label: "Home", href: "/" },
-    { label: "Shop", href: "/shop" },
+    { label: "Shop", href: "/product" },
     { label: "Custom Order", href: "/custom" },
     { label: "About", href: "/about" },
     { label: "Size Guide", href: "/size-guide" },
@@ -48,8 +49,8 @@ const Header = () => {
           }
         `}
       >
-        <div className="max-w-350 mx-auto h-18 px-8 flex items-center justify-between">
-          {/* Logo */}
+        <Container>
+        <div className=" h-18 flex items-center justify-between">
           <button className="flex items-center gap-3">
           <Image
   src="/sarah-logo.jpg"
@@ -134,6 +135,7 @@ const Header = () => {
             </button>
           </div>
         </div>
+        </Container>
       </nav>
 
       {/* Mobile Menu */}

@@ -1,3 +1,5 @@
+import Container from "@/components/ui/shared/Container"
+
 const ProcessSection =() => {
     const steps = [
       { n: '01', title: 'Consultation', desc: 'We begin with a private one-on-one session to understand your vision, requirements, and lifestyle.' },
@@ -10,7 +12,7 @@ const ProcessSection =() => {
   
     return (
       <section style={{ background: '#F8F6F2', padding: '120px 0' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 32px' }}>
+        <Container >
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
             {/* Left: Steps */}
             <div>
@@ -57,7 +59,7 @@ const ProcessSection =() => {
               </div>
             </div>
           </div>
-        </div>
+        </Container>
       </section>
     )
   }

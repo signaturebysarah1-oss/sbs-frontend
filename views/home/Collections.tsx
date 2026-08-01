@@ -1,3 +1,4 @@
+import Container from "@/components/ui/shared/Container"
 import { ArrowRight } from "lucide-react"
 
 const Collections = () => {
@@ -11,7 +12,7 @@ const Collections = () => {
   
     return (
 <section className="bg-[#0B0B0B] py-[100px]">
-  <div className="mx-auto max-w-[1400px] px-8">
+  <Container >
     {/* Header */}
     <div className="mb-14 flex items-end justify-between">
       <div>
@@ -63,7 +64,7 @@ const Collections = () => {
         </button>
       ))}
     </div>
-  </div>
+  </Container>
 </section>
     )
   }

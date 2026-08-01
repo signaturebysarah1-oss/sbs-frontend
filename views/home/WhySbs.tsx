@@ -1,3 +1,5 @@
+import Container from "@/components/ui/shared/Container"
+
 const WhySBSSection = () =>{
     const features = [
       { icon: '◆', title: 'Handcrafted Leather', desc: 'Every pair is shaped and finished by master artisans, not machines.' },
@@ -11,7 +13,7 @@ const WhySBSSection = () =>{
   
     return (
         <section className="bg-[#0B0B0B] py-[120px]">
-        <div className="mx-auto max-w-[1400px] px-8">
+        <Container>
           <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_2fr] lg:gap-20">
       
             {/* Left */}
@@ -61,7 +63,7 @@ const WhySBSSection = () =>{
             </div>
       
           </div>
-        </div>
+        </Container>
       </section>
     )
   }

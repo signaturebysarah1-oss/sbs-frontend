@@ -1,3 +1,5 @@
+import Container from "@/components/ui/shared/Container";
+
 const FeaturedCollection = () => {
   const items = [
     {
@@ -28,7 +30,7 @@ const FeaturedCollection = () => {
 
   return (
     <section className="bg-[#F8F6F2] py-[120px]">
-    <div className="mx-auto max-w-[1400px] px-8">
+    <Container>
   
       <div className="mb-[80px] text-center">
         <div className="mb-4 flex items-center justify-center gap-3">
@@ -118,7 +120,7 @@ const FeaturedCollection = () => {
         ))}
       </div>
   
-    </div>
+    </Container>
   </section>
   );
 };
