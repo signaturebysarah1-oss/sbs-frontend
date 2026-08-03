@@ -147,7 +147,6 @@ export interface AuthUser {
 }
 
 
-
 export interface QuoteItem {
   productId: string;
   productNameSnapshot: string;
@@ -156,11 +155,10 @@ export interface QuoteItem {
   unitPriceSnapshot: number;
 
   variantLabelSnapshot?: string;
-  imageUrlSnapshot?:string
+  imageUrlSnapshot?: string;
+
   materialNameSnapshot?: string;
   colorNameSnapshot?: string;
-
-  customMeasurements?: string;
 
   customNotes?: string;
 }
@@ -168,4 +166,37 @@ export interface QuoteItem {
 export interface QuoteStorage {
   customerNotes?: string;
   items: QuoteItem[];
+}
+
+export interface QuoteItemPayload {
+  productId: string;
+  productNameSnapshot: string;
+
+  variantLabelSnapshot?: string;
+  imageUrlSnapshot?: string;
+  materialNameSnapshot?: string;
+  colorNameSnapshot?: string;
+
+  quantity: number;
+  unitPriceSnapshot: number;
+
+  customNotes?: string;
+}
+
+export interface CreateQuotePayload {
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
+
+  customerNotes?: string;
+
+  items: QuoteItemPayload[];
+}
+
+export interface QuoteData {
+  id: string;
+  customerNotes?: string;
+  items: QuoteItem[];
+  customerStatus: "pending" | "completed";
+  status?: "pending" | "reviewing" | "approved" | "completed" | "cancelled";
 }

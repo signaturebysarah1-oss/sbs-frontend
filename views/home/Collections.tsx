@@ -4,6 +4,7 @@ import { getProducts } from "@/providers/get";
 import { Collection } from "@/types/website";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface CollectionResponse {
   data: Collection[];
@@ -65,10 +66,10 @@ const Collections = ({ data }: CollectionResponse) => {
                   {cat.name}
                 </div>
 
-                <div className="mt-2.5 flex items-center gap-1.5 text-[11px] text-[#F8F6F2]/60">
+                <Link href={`product?${cat.slug}`} className="mt-2.5 cursor-pointer flex items-center gap-1.5 text-[11px] text-[#F8F6F2]/60">
                   <span>Explore</span>
                   <ArrowRight size={14} />
-                </div>
+                </Link>
               </div>
             </button>
           ))}

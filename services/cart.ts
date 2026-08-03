@@ -1,4 +1,5 @@
 import { QuoteItem } from "@/types/website";
+import { toast } from "sonner";
 
 const QUOTE_KEY = "sbs-quote";
 
@@ -25,6 +26,7 @@ export const addToQuote = (item: QuoteItem) => {
   } else {
     quote.push(item);
   }
+  toast.success("Added to quote");
 
   localStorage.setItem(QUOTE_KEY, JSON.stringify(quote));
 };

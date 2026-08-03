@@ -16,6 +16,7 @@ const ProductFiltersSidebar = ({products}: products) => {
     // const allSizes = products.flatMap((product) =>
     //   product.sizes?.map((item) => item.toString()) ?? []
     // );
+    console.log(products)
   const allSizes = products.flatMap((product) =>
     product.sizes?.map((size) => size.toString()) ?? []
   );

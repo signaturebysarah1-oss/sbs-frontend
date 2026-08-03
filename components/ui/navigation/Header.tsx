@@ -6,6 +6,7 @@ import {
   MenuIcon,
   XIcon,
   ShoppingBagIcon,
+  HistoryIcon,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -134,6 +135,9 @@ const Header = () => {
               >
                 <MenuIcon size={24} />
               </button>
+              <Link href="history" className="hidden md:block text-white/70 hover:text-gold transition">
+                <HistoryIcon size={20} />
+              </Link>
             </div>
           </div>
         </Container>

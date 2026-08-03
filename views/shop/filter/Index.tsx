@@ -11,7 +11,7 @@ const Index = () => {
   const searchParams = useSearchParams();
 
   const queryString = searchParams.toString();
-
+  const categories = searchParams.get("category") || "All Products";
   const {
     data: filteredData,
     isLoading,
@@ -34,7 +34,8 @@ const Index = () => {
 
   const products: Product[] = filteredData?.data ?? [];
   const allProducts: Product[] = allProductsData?.data ?? [];
-
+  console.log(products)
+  console.log(allProducts)
 
  
   return (
@@ -50,6 +51,7 @@ const Index = () => {
           products={products}
           isLoading={isLoading}
           error={!!error}
+          category={categories}
         />
       </div>
     </section>

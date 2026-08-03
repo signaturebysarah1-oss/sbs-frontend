@@ -1,123 +1,228 @@
 "use client";
 
-import { QuoteItem } from "@/types/website";
+import { QuoteData, QuoteItem } from "@/types/website";
 import { Edit, Minus, Plus, Trash } from "lucide-react";
 import { useEffect, useState } from "react";
 import EmptyCartState from "./EmptyCart";
 import QuoteSummary from "./Total";
 import Container from "@/components/ui/shared/Container";
 import Link from "next/link";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getPendingQuote } from "@/providers/quoteQuery";
+import { deleteQuoteItem, submitQuote, updateQuote } from "@/providers/quoteMutation";
+import { supabase } from "@/lib/supabase";
+import { Session } from "@supabase/supabase-js";
+
+const QUOTE_KEY = "sbs-quote";
+const CUSTOMER_NOTES_KEY = "sbs-customer-notes";
+
+const getItemKey = (item: QuoteItem) =>
+  [
+    item.productId,
+    item.variantLabelSnapshot ?? "",
+    item.materialNameSnapshot ?? "",
+    item.colorNameSnapshot ?? "",
+  ].join("-");
+
+const readGuestItems = (): QuoteItem[] => {
+  try {
+    const stored = localStorage.getItem(QUOTE_KEY);
+    return stored ? (JSON.parse(stored) as QuoteItem[]) : [];
+  } catch {
+    return [];
+  }
+};
 
 const QuotePage = () => {
-  const [items, setItems] = useState<QuoteItem[]>([]);
+  const [guestItems, setGuestItems] = useState<QuoteItem[]>([]);
   const [editingItem, setEditingItem] = useState<string | null>(null);
-
+  
   const [measurements, setMeasurements] = useState("");
   const [customNotes, setCustomNotes] = useState("");
-
+  
   const [customerNotes, setCustomerNotes] = useState("");
+  
+  const [session, setSession] = useState<Session | null>();
+  const queryClient = useQueryClient();
+  
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+  
+      setSession(session);
+    };
+  
+    checkSession();
+  }, []);
+  
+  const pendingQuoteQueryKey = ["pending-quote", session?.user.id] as const;
+  const { data: pendingQuote } = useQuery({
+    queryKey: pendingQuoteQueryKey,
+    queryFn: getPendingQuote,
+    enabled: !!session,
+  });
 
   useEffect(() => {
-    const stored = localStorage.getItem("sbs-quote");
-
-    if (stored) {
-      const parsed = JSON.parse(stored);
-
-      setItems(
-        parsed.map((item: QuoteItem) => ({
-          ...item,
-          customMeasurements:
-            typeof item.customMeasurements === "string"
-              ? item.customMeasurements
-              : "",
-          customNotes:
-            typeof item.customNotes === "string" ? item.customNotes : "",
-        }))
-      );
+    if (session !== null) {
+      return;
     }
-  }, []);
 
-  const updateQuote = (updatedItems: QuoteItem[]) => {
-    setItems(updatedItems);
-    localStorage.setItem("sbs-quote", JSON.stringify(updatedItems));
+    const loadGuestQuote = () => {
+      setGuestItems(readGuestItems());
+      setCustomerNotes(localStorage.getItem(CUSTOMER_NOTES_KEY) ?? "");
+    };
+
+    window.addEventListener("storage", loadGuestQuote);
+    loadGuestQuote();
+
+    return () => window.removeEventListener("storage", loadGuestQuote);
+  }, [session]);
+
+  useEffect(() => {
+    if (session) {
+      const syncCustomerNotes = () => {
+        setCustomerNotes(pendingQuote?.customerNotes ?? "");
+      };
+
+      syncCustomerNotes();
+    }
+  }, [pendingQuote?.customerNotes, session]);
+
+  const quoteUpdateMutation = useMutation({
+    mutationFn: updateQuote,
+    onMutate: (variables) => {
+      queryClient.setQueryData<QuoteData | null>(pendingQuoteQueryKey, (quote) =>
+        quote ? { ...quote, ...variables } : quote
+      );
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: pendingQuoteQueryKey }),
+    onError: () =>
+      queryClient.invalidateQueries({ queryKey: pendingQuoteQueryKey }),
+  });
+
+  const quoteSubmitMutation = useMutation({
+    mutationFn: submitQuote,
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: pendingQuoteQueryKey }),
+  });
+
+  const quoteDeleteMutation = useMutation({
+    mutationFn: deleteQuoteItem,
+    onMutate: ({ items: updatedItems }) => {
+      queryClient.setQueryData<QuoteData | null>(pendingQuoteQueryKey, (quote) =>
+        quote ? { ...quote, items: updatedItems } : quote
+      );
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: pendingQuoteQueryKey }),
+    onError: () =>
+      queryClient.invalidateQueries({ queryKey: pendingQuoteQueryKey }),
+  });
+
+  const items = session ? pendingQuote?.items ?? [] : guestItems;
+
+  const persistGuestItems = (updatedItems: QuoteItem[]) => {
+    setGuestItems(updatedItems);
+    localStorage.setItem(QUOTE_KEY, JSON.stringify(updatedItems));
+  };
+
+  const updateItems = (updatedItems: QuoteItem[]) => {
+    if (session && pendingQuote) {
+      quoteUpdateMutation.mutate({ id: pendingQuote.id, items: updatedItems });
+      return;
+    }
+
+    if (!session) {
+      persistGuestItems(updatedItems);
+    }
   };
 
   const removeItem = (item: QuoteItem) => {
-    const updated = items.filter(
-      (quoteItem) =>
-        !(
-          quoteItem.productId === item.productId &&
-          quoteItem.colorNameSnapshot === item.colorNameSnapshot &&
-          quoteItem.materialNameSnapshot === item.materialNameSnapshot
-        )
-    );
+    const index = items.indexOf(item);
+    const updated = items.filter((_, itemIndex) => itemIndex !== index);
 
-    updateQuote(updated);
+    if (session && pendingQuote) {
+      quoteDeleteMutation.mutate({ id: pendingQuote.id, items: updated });
+      return;
+    }
+
+    persistGuestItems(updated);
   };
 
   const updateQuantity = (item: QuoteItem, amount: number) => {
-    const updated = items.map((quoteItem) => {
-      if (
-        quoteItem.productId === item.productId &&
-        quoteItem.colorNameSnapshot === item.colorNameSnapshot
-      ) {
+    const index = items.indexOf(item);
+    const updated = items.map((quoteItem, itemIndex) => {
+      if (itemIndex === index) {
         return {
           ...quoteItem,
-          quantity: Math.max(1, quoteItem.quantity + amount),
+          quantity: Math.max(
+            1,
+            quoteItem.quantity + amount
+          ),
         };
       }
-
+  
       return quoteItem;
     });
-
-    updateQuote(updated);
+  
+    updateItems(updated);
   };
 
   const openEdit = (item: QuoteItem) => {
-    setEditingItem(item.productId);
-
-    setMeasurements(
-      typeof item.customMeasurements === "string" ? item.customMeasurements : ""
-    );
-
+    setEditingItem(getItemKey(item));
     setCustomNotes(item.customNotes || "");
   };
 
   const saveCustomization = (item: QuoteItem) => {
-    const updated = items.map((quoteItem) => {
-      if (
-        quoteItem.productId === item.productId &&
-        quoteItem.colorNameSnapshot === item.colorNameSnapshot
-      ) {
+    const index = items.indexOf(item);
+    const updated = items.map((quoteItem, itemIndex) => {
+      if (itemIndex === index) {
         return {
           ...quoteItem,
-          customMeasurements: measurements,
           customNotes,
         };
       }
-
+  
       return quoteItem;
     });
-
-    updateQuote(updated);
+  
+    updateItems(updated);
     setEditingItem(null);
   };
 
   const saveCustomerNotes = () => {
-    localStorage.setItem("sbs-customer-notes", customerNotes);
+    if (session && pendingQuote) {
+      quoteUpdateMutation.mutate({
+        id: pendingQuote.id,
+        customerNotes,
+      });
+      return;
+    }
+
+    if (!session) localStorage.setItem(CUSTOMER_NOTES_KEY, customerNotes);
   };
 
   const total = items.reduce(
-    (acc, item) => acc + item.unitPriceSnapshot * item.quantity,
+    (acc, item) =>
+      acc + item.unitPriceSnapshot * item.quantity,
     0
   );
-
-  const fmt = (value: number) => `₦${value.toLocaleString()}`;
-
+  
+  const fmt = (value: number) =>
+    `₦${value.toLocaleString()}`;
   return (
     <div className="bg-[#F8F6F2] px-5 py-10 lg:px-10">
-      <Container className="flex justify-between gap-10">
+      <Container
+        className={items.length > 0 ? "flex justify-between gap-10" : ""}
+      >
+       
+
+        {" "}
         <div className="flex flex-col gap-4">
+
           <div className="mb-2 flex items-center justify-between">
             <h2 className="font-display text-[22px] font-bold text-[#0B0B0B]">
               Selected Pieces{" "}
@@ -126,13 +231,18 @@ const QuotePage = () => {
               </span>
             </h2>
 
-            <Link href="/products" className="font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-[#927f04] underline">
+            <Link
+              href="/products"
+              className="font-sans text-[11px] font-semibold uppercase tracking-[0.1em] text-[#927f04] underline"
+            >
               + Continue Shopping
             </Link>
           </div>
 
           {items.length === 0 ? (
-            <EmptyCartState />
+            <div className="w-full">
+              <EmptyCartState />
+            </div>
           ) : (
             items.map((item) => (
               <div
@@ -184,7 +294,7 @@ const QuotePage = () => {
                         </button>
                       </div>
 
-                      {editingItem === item.productId && (
+                      {editingItem === getItemKey(item) && (
                         <div className="mt-6 space-y-4">
                           <div className="grid grid-cols-2 gap-3">
                             <div>
@@ -257,29 +367,44 @@ const QuotePage = () => {
             ))
           )}
 
-          <div className="rounded-2xl border border-[#EAE6DD] bg-white p-7">
-            <label className="mb-3 block text-[11px] font-bold uppercase">
-              Additional Notes
-            </label>
+          {items.length > 0 && (
+            <div className="rounded-2xl border border-[#EAE6DD] bg-white p-7">
+              <label className="mb-3 block text-[11px] font-bold uppercase">
+                Additional Notes
+              </label>
 
-            <textarea
-              rows={4}
-              value={customerNotes}
-              onChange={(e) => setCustomerNotes(e.target.value)}
-              placeholder="General requests, delivery details, questions..."
-              className="w-full rounded-lg border bg-[#F8F6F2] p-4 text-sm"
-            />
+              <textarea
+                rows={4}
+                value={customerNotes}
+                onChange={(e) => setCustomerNotes(e.target.value)}
+                placeholder="General requests, delivery details, questions..."
+                className="w-full rounded-lg border bg-[#F8F6F2] p-4 text-sm"
+              />
 
-            <button
-              onClick={saveCustomerNotes}
-              className="mt-3 rounded bg-[#0B0B0B] px-5 py-3 text-xs font-bold uppercase text-[#FAD90C]"
-            >
-              Save Notes
-            </button>
-          </div>
+              <button
+                onClick={saveCustomerNotes}
+                className="mt-3 rounded bg-[#0B0B0B] px-5 py-3 text-xs font-bold uppercase text-[#FAD90C]"
+              >
+                Save Notes
+              </button>
+            </div>
+          )}
         </div>
-
-        <QuoteSummary items={items} total={total} fmt={fmt} />
+        {items.length > 0 && (
+          <QuoteSummary
+            items={items}
+            total={total}
+            fmt={fmt}
+            customerNotes={customerNotes}
+            onCustomerNotesChange={setCustomerNotes}
+            onSubmitLoggedInQuote={
+              session && pendingQuote
+                ? () => quoteSubmitMutation.mutateAsync(pendingQuote.id)
+                : undefined
+            }
+            isSubmittingLoggedInQuote={quoteSubmitMutation.isPending}
+          />
+        )}
       </Container>
     </div>
   );

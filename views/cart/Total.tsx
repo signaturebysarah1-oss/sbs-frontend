@@ -3,31 +3,54 @@
 import { QuoteItem } from "@/types/website";
 import { useState } from "react";
 import QuoteChoiceModal from "./QuotesRequestModal";
-
+import { supabase } from "@/lib/supabase";
+import { useCreateQuote } from "@/hooks/useCreateQuotes";
+import { Loader2 } from "lucide-react";
+import SuccessModal from "@/components/ui/modals/SuccesModal";
 interface Props {
   items: QuoteItem[];
   total: number;
   fmt: (value: number) => string;
+  customerNotes: string;
+  onCustomerNotesChange: (value: string) => void;
+  onSubmitLoggedInQuote?: () => Promise<unknown>;
+  isSubmittingLoggedInQuote: boolean;
 }
 
-const QuoteSummary = ({ items, total, fmt }: Props) => {
+const QuoteSummary = ({
+  items,
+  total,
+  fmt,
+  customerNotes,
+  onCustomerNotesChange,
+  onSubmitLoggedInQuote,
+  isSubmittingLoggedInQuote,
+}: Props) => {
   const [showQuoteModal, setShowQuoteModal] = useState(false);
   const [showGuestForm, setShowGuestForm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
   });
+  const { mutate: createQuote, isPending } = useCreateQuote();
+  const submitLoggedInQuote = async () => {
+    if (!onSubmitLoggedInQuote) return;
 
-  const [customerNotes, setCustomerNotes] = useState("");
+    try {
+      await onSubmitLoggedInQuote();
+      setShowSuccess(true);
+    } catch (error) {
+      console.error("Quote failed", error);
+    }
+  };
 
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    setSubmitting(true);
 
     const payload = {
       guestName: form.name,
@@ -38,18 +61,28 @@ const QuoteSummary = ({ items, total, fmt }: Props) => {
         productId: item.productId,
         productNameSnapshot: item.productNameSnapshot,
         variantLabelSnapshot: item.variantLabelSnapshot,
+        imageUrlSnapshot: item.imageUrlSnapshot,
         materialNameSnapshot: item.materialNameSnapshot,
         colorNameSnapshot: item.colorNameSnapshot,
         quantity: item.quantity,
         unitPriceSnapshot: item.unitPriceSnapshot,
-        customMeasurements: item.customMeasurements || {},
         customNotes: item.customNotes || "",
       })),
     };
 
-    console.log(payload);
-
-    setSubmitting(false);
+    setSubmitting(true);
+    createQuote(payload, {
+      onSuccess: () => {
+        localStorage.removeItem("sbs-quote");
+        localStorage.removeItem("sbs-customer-notes");
+        setShowGuestForm(false);
+        setShowSuccess(true);
+      },
+      onError: (error) => {
+        console.error("Quote failed", error);
+      },
+      onSettled: () => setSubmitting(false),
+    });
   };
 
   return (
@@ -75,14 +108,14 @@ const QuoteSummary = ({ items, total, fmt }: Props) => {
                     {item.colorNameSnapshot} • Qty {item.quantity}
                   </p>
 
-                  {item.customMeasurements && (
+                  {/* {item.customMeasurements && (
                     <p className="mt-2 text-xs text-white/50">
                       Measurement:{" "}
                       {typeof item.customMeasurements === "string"
                         ? item.customMeasurements
                         : JSON.stringify(item.customMeasurements)}
                     </p>
-                  )}
+                  )} */}
 
                   {item.customNotes && (
                     <p className="text-xs text-white/50">
@@ -116,16 +149,27 @@ const QuoteSummary = ({ items, total, fmt }: Props) => {
         </div>
       </div>
 
-
       {!showGuestForm && (
-        <button
-          onClick={() => setShowQuoteModal(true)}
-          className="mt-4 w-full rounded-xl bg-[#FAD90C] py-4 text-sm font-semibold uppercase tracking-wider text-[#0B0B0B]"
-        >
-          Request Quote
-        </button>
+       <button
+       onClick={async () => {
+     
+         const {
+           data: {
+             session
+           }
+         } = await supabase.auth.getSession();
+         if(session){
+           submitLoggedInQuote();
+           return;
+         }
+         setShowQuoteModal(true);
+     
+       }}
+       className="mt-4 w-full flex items-center justify-center rounded-xl bg-[#FAD90C] py-4 text-sm font-semibold uppercase tracking-wider text-[#0B0B0B]"
+     >
+       {isPending || isSubmittingLoggedInQuote ? <Loader2 className="animate-spin text-white"/> : "Request a Quote"}
+     </button>
       )}
-
 
       {showGuestForm && (
         <form
@@ -135,7 +179,6 @@ const QuoteSummary = ({ items, total, fmt }: Props) => {
           <div className="text-xs font-bold uppercase tracking-[0.14em] text-[#0B0B0B]">
             Your Details
           </div>
-
 
           <input
             placeholder="Full Name"
@@ -149,7 +192,6 @@ const QuoteSummary = ({ items, total, fmt }: Props) => {
             }
             className="rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] px-4 py-3 text-sm outline-none"
           />
-
 
           <input
             placeholder="Email Address"
@@ -165,7 +207,6 @@ const QuoteSummary = ({ items, total, fmt }: Props) => {
             className="rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] px-4 py-3 text-sm outline-none"
           />
 
-
           <input
             placeholder="Phone / WhatsApp"
             value={form.phone}
@@ -178,15 +219,13 @@ const QuoteSummary = ({ items, total, fmt }: Props) => {
             className="rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] px-4 py-3 text-sm outline-none"
           />
 
-
           <textarea
             placeholder="Additional notes"
             rows={3}
             value={customerNotes}
-            onChange={(e) => setCustomerNotes(e.target.value)}
+            onChange={(e) => onCustomerNotesChange(e.target.value)}
             className="rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] px-4 py-3 text-sm outline-none"
           />
-
 
           <button
             disabled={submitting}
@@ -197,7 +236,6 @@ const QuoteSummary = ({ items, total, fmt }: Props) => {
         </form>
       )}
 
-
       <QuoteChoiceModal
         open={showQuoteModal}
         onClose={() => setShowQuoteModal(false)}
@@ -205,11 +243,17 @@ const QuoteSummary = ({ items, total, fmt }: Props) => {
           setShowQuoteModal(false);
           setShowGuestForm(true);
         }}
+        items={items}
       />
-
+      <SuccessModal
+  open={showSuccess}
+  onOpenChange={setShowSuccess}
+  title="Quote Submitted!"
+  description="Your quote request has been received. We'll review it and contact you shortly."
+/>
 
       <p className="mt-4 text-center text-xs text-[#888]">
-        No payment required. We'll contact you within 24–48 hours.
+        No payment required. We&apos;ll contact you within 24–48 hours.
       </p>
     </div>
   );

@@ -9,17 +9,16 @@ import { Product } from "@/types/website";
 import { getProducts } from "@/providers/get";
 import { useQuery } from "@tanstack/react-query";
 
-interface products{
-  products: Product[]
-  error:boolean
-  isLoading:boolean
+interface products {
+  products: Product[];
+  error: boolean;
+  isLoading: boolean;
+  category: string;
 }
 
-const Products = ({products,error,isLoading}: products) => {
+const Products = ({ products, error, isLoading, category }: products) => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
-
-
 
   if (isLoading) {
     return (
@@ -32,22 +31,21 @@ const Products = ({products,error,isLoading}: products) => {
   if (error) {
     return (
       <Container>
-        <div className="my-20 text-center">
-          Failed to load products.
-        </div>
+        <div className="my-20 text-center">Failed to load products.</div>
       </Container>
     );
   }
 
   return (
     <Container>
+     
       <div className="my-8 grid grid-cols-3 gap-5">
+      
         {products.map((product) => {
           const primaryImage =
             product.images.find((img) => img.isPrimary) ?? product.images[0];
 
-          const hoverImage =
-            product.images[1] ?? primaryImage;
+          const hoverImage = product.images[1] ?? primaryImage;
 
           return (
             <article
@@ -137,8 +135,8 @@ const Products = ({products,error,isLoading}: products) => {
                     )}
                   </div>
                 )}
-               <h3 className="font-display text-[17px] font-semibold leading-[1.2] text-[#0B0B0B]">
-               ₦{product.basePrice}
+                <h3 className="font-display text-[17px] font-semibold leading-[1.2] text-[#0B0B0B]">
+                  ₦{product.basePrice}
                 </h3>
               </div>
             </article>
@@ -152,7 +150,7 @@ const Products = ({products,error,isLoading}: products) => {
           open={open}
           onOpenChange={setOpen}
         />
-      )}x
+      )}
     </Container>
   );
 };

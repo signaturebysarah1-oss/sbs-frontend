@@ -8,9 +8,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Product } from "@/types/website";
+import { CreateQuotePayload, Product } from "@/types/website";
 import { useState } from "react";
 import { addToQuote } from "@/services/cart";
+import { useCreateQuote } from "@/hooks/useCreateQuotes";
+import { createQuote } from "@/providers/quoteMutation";
+import { getCurrentSession } from "@/lib/seesion";
+import { useMutation } from "@tanstack/react-query";
+import { postData } from "@/providers/mutations/Index";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface ViewModalProps {
   products: Product;
@@ -37,15 +44,67 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
       variantLabelSnapshot: selectedSize ? `EU ${selectedSize}` : undefined,
       materialNameSnapshot: products.materials[0]?.name,
       colorNameSnapshot: products.colors[selectedColor]?.name,
-      customMeasurements: "",
-      imageUrlSnapshot: products.images[0].imageUrl,
-
       customNotes: "",
     });
-
+  
     onOpenChange(false);
   };
-
+  
+  const {
+    mutate: createQuote,
+    isPending,
+    isSuccess,
+    isError,
+    error,
+  } = useMutation({
+    mutationFn: (payload: CreateQuotePayload) =>
+      postData("api/quotes", payload),
+  
+    onSuccess: (data) => {
+      toast.success("Added to quote");
+      console.log(data);
+    },
+  
+    onError: (error) => {
+      console.log(error.message);
+    },
+  });
+  const handleQuoteAction = async () => {
+    const session = await getCurrentSession();
+  console.log(session,"session")
+    if (session) {
+          createQuote(
+        {
+          customerNotes: "",
+          items: [
+            {
+              productId: products.id,
+              productNameSnapshot: products.name || "",
+              quantity: 1,
+              unitPriceSnapshot: products.basePrice,
+              variantLabelSnapshot: selectedSize
+                ? `EU ${selectedSize}`
+                : undefined,
+              materialNameSnapshot: products.materials[0]?.name,
+              colorNameSnapshot: products.colors[selectedColor]?.name,
+              // customMeasurements: {},
+              customNotes: "",
+            },
+          ],
+        },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+          },
+          onError: (error) => {
+            console.error(error);
+          },
+        }
+      );;
+    } else {
+      handleAddToQuote();
+    }
+  };
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="overflow-hidden p-0 lg:max-w-3xl">
@@ -181,10 +240,10 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
             </div>
 
             <button
-              onClick={handleAddToQuote}
-              className="rounded-[10px] bg-[#0B0B0B] px-4 py-[15px] text-[11px] font-bold uppercase tracking-[0.12em] text-[#FAD90C] transition-colors hover:bg-[#1A1A1A]"
+              onClick={handleQuoteAction}
+              className="rounded-[10px] flex justify-center items-center bg-[#0B0B0B] px-4 py-[15px] text-[11px] font-bold uppercase tracking-[0.12em] text-[#FAD90C] transition-colors hover:bg-[#1A1A1A]"
             >
-              Add to Quote
+             {isPending ?<Loader2 className="animate-spin"/> : "Add to Quote"}
             </button>
 
             {products.isNewArrival && (
