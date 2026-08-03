@@ -11,6 +11,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Container from "../shared/Container";
+import Link from "next/link";
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -30,7 +31,7 @@ const Header = () => {
     { label: "Home", href: "/" },
     { label: "Shop", href: "/product" },
     { label: "Custom Order", href: "/custom" },
-    { label: "About", href: "/about" },
+    // { label: "About", href: "/about" },
     { label: "Size Guide", href: "/size-guide" },
     { label: "Contact", href: "/contact" },
   ];
@@ -50,38 +51,38 @@ const Header = () => {
         `}
       >
         <Container>
-        <div className=" h-18 flex items-center justify-between">
-          <button className="flex items-center gap-3">
-          <Image
-  src="/sarah-logo.jpg"
-  alt="SBS Logo"
-  width={42}
-  height={42}
-  className="rounded"
-/>
-            <div className="flex flex-col leading-none">
-              <span className="text-gold text-[13px] font-bold tracking-[0.06em]">
-                SIGNATURE
-              </span>
+          <div className=" h-18 flex items-center justify-between">
+            <button className="flex items-center gap-3">
+              <Image
+                src="/sarah-logo.jpg"
+                alt="SBS Logo"
+                width={42}
+                height={42}
+                className="rounded"
+              />
+              <div className="flex flex-col leading-none">
+                <span className="text-gold text-[13px] font-bold tracking-[0.06em]">
+                  SIGNATURE
+                </span>
 
-              <span className="text-white/55 text-[9px] font-normal tracking-[0.2em] uppercase">
-                by sarah
-              </span>
-            </div>
-          </button>
+                <span className="text-white/55 text-[9px] font-normal tracking-[0.2em] uppercase">
+                  by sarah
+                </span>
+              </div>
+            </button>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-9">
-            {navLinks.map(({ label, href }) => {
-              const active =
-                pathname === href ||
-                (href !== "/" && pathname.startsWith(href));
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-9">
+              {navLinks.map(({ label, href }) => {
+                const active =
+                  pathname === href ||
+                  (href !== "/" && pathname.startsWith(href));
 
-              return (
-                <a
-                  key={href}
-                  href={href}
-                  className={`
+                return (
+                  <a
+                    key={href}
+                    href={href}
+                    className={`
                     text-[11px]
                     font-medium
                     tracking-[0.12em]
@@ -89,29 +90,29 @@ const Header = () => {
                     transition-colors
                     ${active ? "text-gold" : "text-white/75 hover:text-gold"}
                   `}
-                >
-                  {label}
-                </a>
-              );
-            })}
-          </div>
+                  >
+                    {label}
+                  </a>
+                );
+              })}
+            </div>
 
-          {/* Icons */}
-          <div className="flex items-center gap-5">
-            <button className="hidden md:block text-white/70 hover:text-gold transition">
-              <SearchIcon size={20} />
-            </button>
+            {/* Icons */}
+            <div className="flex items-center gap-5">
+              <button className="hidden md:block text-white/70 hover:text-gold transition">
+                <SearchIcon size={20} />
+              </button>
 
-            <button className="hidden md:block text-white/70 hover:text-gold transition">
-              <HeartIcon size={20} />
-            </button>
+              <button className="hidden md:block text-white/70 hover:text-gold transition">
+                <HeartIcon size={20} />
+              </button>
+              <Link className="cursor-pointer" href="/cart">
+                <span className="relative  text-white/70 hover:text-gold transition">
+                  <ShoppingBagIcon size={20} />
 
-            <button className="relative text-white/70 hover:text-gold transition">
-              <ShoppingBagIcon size={20} />
-
-              {cartCount > 0 && (
-                <span
-                  className="
+                  {cartCount > 0 && (
+                    <span
+                      className="
                     absolute -top-2 -right-2
                     h-4 w-4
                     rounded-full
@@ -121,20 +122,20 @@ const Header = () => {
                     font-bold
                     flex items-center justify-center
                   "
-                >
-                  {cartCount}
+                    >
+                      {cartCount}
+                    </span>
+                  )}
                 </span>
-              )}
-            </button>
-
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="md:hidden text-white/80"
-            >
-              <MenuIcon size={24} />
-            </button>
+              </Link>
+              <button
+                onClick={() => setMobileOpen(true)}
+                className="md:hidden text-white/80"
+              >
+                <MenuIcon size={24} />
+              </button>
+            </div>
           </div>
-        </div>
         </Container>
       </nav>
 

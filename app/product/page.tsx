@@ -1,8 +1,9 @@
 import ShopPage from "@/views/shop/Index"
+import { Suspense } from "react"
 
 const page = () => {
   return (
-    <div><ShopPage/></div>
+    <Suspense fallback={null}><ShopPage/></Suspense>
   )
 }
 

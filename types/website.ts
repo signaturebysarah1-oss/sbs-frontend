@@ -1,3 +1,12 @@
+export interface HeroCarousel {
+  id: string;
+  imageUrl: string;
+  imagePublicId: string;
+  sortOrder: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 export interface Product {
   id: string;
   name: string;
@@ -20,7 +29,7 @@ export interface Product {
   variants: ProductVariant[];
   materials: Material[];
   colors: Color[];
-
+sizes:number[]
   createdAt: string;
   updatedAt: string;
 }
@@ -46,14 +55,17 @@ export interface ProductVariant {
 }
 
 export interface Collection {
-  id: string;
+  id?: string;
   name: string;
   slug: string;
-  description?: string;
-  imageUrl?: string | null;
-  status: "published" | "draft";
+  description: string;
+  imageUrl: string;
+  imagePublicId: string;
+  status: "draft" | "published" | "archived";
+  isFeatured: boolean;
   sortOrder: number;
-  productCount: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Material {
@@ -132,4 +144,28 @@ export interface AuthUser {
   phone?: string | null;
   role: "customer" | "admin" | "super-admin";
   isActive: boolean;
+}
+
+
+
+export interface QuoteItem {
+  productId: string;
+  productNameSnapshot: string;
+
+  quantity: number;
+  unitPriceSnapshot: number;
+
+  variantLabelSnapshot?: string;
+  imageUrlSnapshot?:string
+  materialNameSnapshot?: string;
+  colorNameSnapshot?: string;
+
+  customMeasurements?: string;
+
+  customNotes?: string;
+}
+
+export interface QuoteStorage {
+  customerNotes?: string;
+  items: QuoteItem[];
 }

@@ -4,42 +4,52 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
-import { ALL_PRODUCTS } from "../data";
+import { Product } from "@/types/website";
 
+interface products{
+  products: Product[]
+  error:boolean
+  isLoading:boolean
+}
 
-
-export default function ProductFiltersSidebar() {
-  const allSizes = ALL_PRODUCTS.flatMap((product) =>
-    product.variants.map((item) => item.sizeValue.toString())
+const ProductFiltersSidebar = ({products}: products) => {
+    // const allSizes = products.flatMap((product) =>
+    //   product.sizes?.map((item) => item.toString()) ?? []
+    // );
+  const allSizes = products.flatMap((product) =>
+    product.sizes?.map((size) => size.toString()) ?? []
   );
+
   const sizes = [...new Set(allSizes)];
-  
-  const allCategories = ALL_PRODUCTS.map((item) => item.category);
+
+  const allCategories = products.map((item) => item.category);
   const categories = [...new Set(allCategories)];
-  
-  const genders = [...new Set(ALL_PRODUCTS.map((product) => product.gender))].map(
-    (product) => ({
-      label: product,
-      value: product,
-    })
+
+  const genders = [...new Set(products.map((product) => product.gender))]
+    .filter(Boolean)
+    .map((gender) => ({
+      label: gender,
+      value: gender,
+    }));
+
+  const allColors = products.flatMap((product) =>
+    product.colors?.map((item) => item.hexCode) ?? []
   );
-  
-  const allcolor = ALL_PRODUCTS.flatMap((products) =>
-    products.variants.map((item) => item.color.hexCode)
+
+  const colors = [...new Set(allColors)];
+
+  const allMaterials = products.flatMap((product) =>
+    product.materials?.map((item) => ({
+      name: item.name,
+      slug: item.slug,
+    })) ?? []
   );
-  const colors = [...new Set(allcolor)];
-  
-  const allMaterials = ALL_PRODUCTS.flatMap((product) =>
-    product.materials.map((items) => ({
-      name: items.name,
-      slug: items.slug,
-    }))
+
+  const materialsMap = new Map(
+    allMaterials.map((item) => [item.name, item])
   );
-  
-  const materials = new Map(allMaterials.map((item) => [item.name, item]));
-  const material = Array.from(materials.values());
-  
-  
+
+  const material = Array.from(materialsMap.values());
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -85,7 +95,10 @@ export default function ProductFiltersSidebar() {
       <div className="h-[90vh] overflow-scroll space-y-6  [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Filters</h2>
-          <Button variant="ghost" size="sm" onClick={clearFilters}>
+          <Button 
+                               className="inline-block rounded-lg bg-[#0B0B0B] px-2.5 py-[3px] text-[9px] font-bold uppercase tracking-[0.12em] text-[#FAD90C]"
+
+          variant="ghost" size="sm" onClick={clearFilters}>
             Clear
           </Button>
         </div>
@@ -214,3 +227,4 @@ export default function ProductFiltersSidebar() {
     </aside>
   );
 }
+export default ProductFiltersSidebar
