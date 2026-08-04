@@ -93,9 +93,9 @@ const QuoteSummary = ({
         </h3>
 
         <div className="mt-6 space-y-4">
-          {items.map((item) => (
+          {items.map((item,idx) => (
             <div
-              key={`${item.productId}-${item.colorNameSnapshot}`}
+              key={`${item.productId}-${item.colorNameSnapshot}-${idx}`}
               className="border-b border-white/10 pb-4"
             >
               <div className="flex justify-between">

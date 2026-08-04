@@ -43,6 +43,8 @@ const Hero = () => {
               gap: "12px",
               marginBottom: "16px",
             }}
+            className="pt-10"
+
           >
             <span
               style={{

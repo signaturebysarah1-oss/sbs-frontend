@@ -1,230 +1,346 @@
-interface ShoeStyleProps {
-  selections: Record<string, string>;
-  select: (key: string, value: string) => void;
+"use client";
+
+import SuccessModal from "@/components/ui/modals/SuccesModal";
+import { supabase } from "@/lib/supabase";
+import QuoteChoiceModal from "@/views/cart/QuotesRequestModal";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { useCreateQuote } from "@/hooks/useCreateQuotes";
+import { useRouter } from "next/navigation";
+
+interface ExtraMeasurement {
+  label: string;
+  value: string;
 }
 
-const Review = ({ selections, select }: ShoeStyleProps) => {
+interface CustomMeasurements {
+  leftFront: string;
+  rightFront: string;
+  leftBack: string;
+  rightBack: string;
+  extra: ExtraMeasurement[];
+}
+
+interface ReviewSelections {
+  collectionSlug?: string;
+  productId?: string;
+  productName?: string;
+  imageUrlSnapshot?: string;
+  unitPriceSnapshot?: number;
+  material?: string;
+  color?: string;
+  sole?: string;
+  toeStyleSnapshot?: string;
+  initials?: string;
+  size?: string;
+  customMeasurements?: CustomMeasurements;
+}
+
+interface ReviewProps {
+  selections: ReviewSelections;
+  select: (key: string, value: any) => void;
+}
+
+const FALLBACK_PRICE = 185000;
+
+const Review = ({ selections }: ReviewProps) => {
+  const [showQuoteModal, setShowQuoteModal] = useState(false);
+  const [showGuestForm, setShowGuestForm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const router = useRouter();
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
+
+  const { mutate: createQuote, isPending } = useCreateQuote();
+
+  const displayPrice = selections.unitPriceSnapshot || FALLBACK_PRICE;
+
+  const buildQuotePayload = (isGuest = false) => {
+    const storedOrder = localStorage.getItem("sbs-custom-order");
+    const order: ReviewSelections = storedOrder
+      ? JSON.parse(storedOrder)
+      : selections;
+
+    return {
+      ...(isGuest && {
+        guestName: form.name,
+        guestEmail: form.email,
+        guestPhone: form.phone,
+      }),
+
+      items: [
+        {
+          productId: order.productId,
+
+          productNameSnapshot: order.productName || "Custom Shoe",
+
+          imageUrlSnapshot: order.imageUrlSnapshot || "custom",
+
+          shoeNameSnapshot: order.productName || "Custom Shoe",
+
+          toeStyleSnapshot: order.toeStyleSnapshot || "custom",
+
+          size: order.size || null,
+
+          material: order.material || "custom",
+
+          color: order.color || "custom",
+
+          quantity: 1,
+
+          unitPriceSnapshot: order.unitPriceSnapshot || FALLBACK_PRICE,
+
+          customMeasurements: order.customMeasurements || {},
+
+          customNotes: order.initials || "",
+        },
+      ],
+    };
+  };
+
+  const submitLoggedInQuote = () => {
+    const payload = buildQuotePayload();
+
+    createQuote(payload, {
+      onSuccess: () => {
+        localStorage.removeItem("sbs-custom-order");
+        setShowSuccess(true);
+        router.push("/custom");
+      },
+
+      onError: (error) => {
+        console.error("Quote failed", error);
+      },
+    });
+  };
+
+  const submitGuestQuote = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const payload = buildQuotePayload(true);
+
+    createQuote(payload, {
+      onSuccess: () => {
+        localStorage.removeItem("sbs-custom-order");
+
+        setShowGuestForm(false);
+        router.push("/custom");
+
+        setShowSuccess(true);
+      },
+
+      onError: (error) => {
+        console.error("Quote failed", error);
+      },
+    });
+  };
+
+  const requestQuote = async () => {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (session) {
+      submitLoggedInQuote();
+      return;
+    }
+
+    setShowQuoteModal(true);
+  };
+
+  const summary = [
+    {
+      label: "Style",
+      value: selections.productName,
+    },
+    {
+      label: "Material",
+      value: selections.material,
+    },
+    {
+      label: "Color",
+      value: selections.color,
+    },
+    {
+      label: "Toe Shape",
+      value: selections.toeStyleSnapshot,
+    },
+    {
+      label: "Size",
+      value:
+        selections.size ||
+        (selections.customMeasurements ? "Custom Measurements" : "—"),
+    },
+  ];
+
   return (
     <div>
-      <h2
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "36px",
-          fontWeight: 700,
-          color: "#0B0B0B",
-          marginBottom: "8px",
-        }}
-      >
+      <h2 className="mb-2 font-display text-4xl font-bold text-[#0B0B0B]">
         Review Your Order
       </h2>
-      <p
-        style={{
-          fontFamily: "var(--font-sans)",
-          fontSize: "14px",
-          color: "#888",
-          marginBottom: "40px",
-        }}
-      >
+
+      <p className="mb-10 text-sm text-[#888]">
         Your bespoke shoes, one final look before we begin crafting.
       </p>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "40px",
-          alignItems: "start",
-        }}
-      >
-        <div
-          style={{
-            background: "#0B0B0B",
-            borderRadius: "20px",
-            padding: "36px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              marginBottom: "28px",
-            }}
-          >
-            {/* <img
-            // src={sbsLogo}
-            alt="SBS"
-            style={{
-              height: "36px",
-              width: "36px",
-              objectFit: "contain",
-            }}
-          /> */}
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "18px",
-                fontWeight: 600,
-                color: "#F8F6F2",
-              }}
-            >
-              Order Summary
+
+      <div className="grid items-start gap-10 lg:grid-cols-2">
+        <div className="rounded-[20px] bg-[#0B0B0B] p-9">
+          <h3 className="mb-7 font-display text-xl font-semibold text-[#F8F6F2]">
+            Order Summary
+          </h3>
+
+          {selections.imageUrlSnapshot && (
+            <div className="mb-6 overflow-hidden rounded-xl">
+              <img
+                src={selections.imageUrlSnapshot}
+                alt={selections.productName || "Selected shoe"}
+                className="h-48 w-full object-cover"
+              />
             </div>
-          </div>
-          {[
-            ["Style", selections.style],
-            ["Material", selections.material],
-            ["Color", selections.color],
-            ["Sole", selections.sole],
-            ["Toe Shape", selections.toe],
-            ["Initials", selections.initials || "—"],
-            ["Size", selections.size || "Custom"],
-          ].map(([label, value]) => (
+          )}
+
+          {summary.map((item) => (
             <div
-              key={label}
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                borderBottom: "1px solid rgba(248,246,242,0.08)",
-                padding: "12px 0",
-              }}
+              key={item.label}
+              className="flex items-center justify-between border-b border-white/10 py-3"
             >
-              <span
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "12px",
-                  color: "rgba(248,246,242,0.45)",
-                  letterSpacing: "0.06em",
-                  textTransform: "uppercase",
-                }}
-              >
-                {label}
+              <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-white/50">
+                {item.label}
               </span>
-              <span
-                style={{
-                  fontFamily: "var(--font-sans)",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  color: "#FAD90C",
-                  textTransform: "capitalize",
-                }}
-              >
-                {value || "—"}
+
+              <span className="text-sm font-semibold capitalize text-[#FAD90C]">
+                {item.value || "—"}
               </span>
             </div>
           ))}
-          <div
-            style={{
-              marginTop: "24px",
-              padding: "20px",
-              background: "rgba(250,217,12,0.08)",
-              borderRadius: "12px",
-              border: "1px solid rgba(250,217,12,0.2)",
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "10px",
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                color: "#FAD90C",
-                marginBottom: "8px",
-              }}
-            >
+
+          <div className="mt-8 rounded-xl border border-[#FAD90C]/20 bg-[#FAD90C]/10 p-5">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#FAD90C]">
               Timeline
-            </div>
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "16px",
-                fontWeight: 600,
-                color: "#F8F6F2",
-                marginBottom: "4px",
-              }}
-            >
+            </p>
+
+            <h4 className="font-display text-lg font-semibold text-white">
               3–4 Weeks Production
-            </div>
-            <div
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "12px",
-                color: "rgba(248,246,242,0.5)",
-              }}
-            >
+            </h4>
+
+            <p className="mt-1 text-sm text-white/60">
               + 5–10 Business Days Delivery
-            </div>
+            </p>
           </div>
         </div>
+
+        {/* Right */}
+
         <div>
-          <div
-            style={{
-              background: "#F8F6F2",
-              border: "2px solid #EAE6DD",
-              borderRadius: "20px",
-              padding: "36px",
-              marginBottom: "20px",
-            }}
-          >
-            <div
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "11px",
-                fontWeight: 600,
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                color: "#888",
-                marginBottom: "8px",
-              }}
-            >
+          <div className="mb-5 rounded-[20px] border-2 border-[#EAE6DD] bg-[#F8F6F2] p-9">
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#888]">
               Estimated Starting Price
-            </div>
-            <div
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "40px",
-                fontWeight: 700,
-                color: "#0B0B0B",
-                letterSpacing: "-0.02em",
-              }}
-            >
-              ₦185,000
-              <span style={{ fontSize: "18px", color: "#888" }}>+</span>
-            </div>
-            <div
-              style={{
-                fontFamily: "var(--font-sans)",
-                fontSize: "12px",
-                color: "#888",
-                marginTop: "8px",
-              }}
-            >
-              Final quote provided within 24 hours of request
-            </div>
+            </p>
+
+            <h2 className="font-display text-5xl font-bold tracking-tight text-[#0B0B0B]">
+              ₦{displayPrice.toLocaleString()}
+              <span className="text-xl text-[#888]">+</span>
+            </h2>
+
+            <p className="mt-2 text-sm text-[#888]">
+              Final quote provided within 24 hours of request.
+            </p>
           </div>
-          <button
-            className="btn-gold"
-            style={{
-              width: "100%",
-              padding: "18px",
-              fontSize: "13px",
-              borderRadius: "12px",
-            }}
-          >
-            Request Custom Quote
-          </button>
-          <p
-            style={{
-              fontFamily: "var(--font-sans)",
-              fontSize: "11px",
-              color: "#aaa",
-              textAlign: "center",
-              marginTop: "16px",
-              lineHeight: 1.6,
-            }}
-          >
+
+          {!showGuestForm && (
+            <button
+              onClick={requestQuote}
+              disabled={isPending}
+              className="mt-4 flex w-full items-center justify-center rounded-xl bg-[#FAD90C] py-4 text-sm font-semibold uppercase tracking-wider text-[#0B0B0B]"
+            >
+              {isPending ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                "Request a Quote"
+              )}
+            </button>
+          )}
+
+          {showGuestForm && (
+            <form
+              onSubmit={submitGuestQuote}
+              className="mt-4 flex flex-col gap-4 rounded-2xl border border-[#EAE6DD] bg-white p-7"
+            >
+              <div className="text-xs font-bold uppercase tracking-[0.14em] text-[#0B0B0B]">
+                Your Details
+              </div>
+
+              <input
+                placeholder="Full Name"
+                required
+                value={form.name}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    name: e.target.value,
+                  })
+                }
+                className="rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] px-4 py-3 text-sm outline-none"
+              />
+
+              <input
+                placeholder="Email Address"
+                required
+                type="email"
+                value={form.email}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    email: e.target.value,
+                  })
+                }
+                className="rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] px-4 py-3 text-sm outline-none"
+              />
+
+              <input
+                placeholder="Phone / WhatsApp"
+                value={form.phone}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    phone: e.target.value,
+                  })
+                }
+                className="rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] px-4 py-3 text-sm outline-none"
+              />
+
+              <button
+                disabled={isPending}
+                className="rounded-lg bg-[#0B0B0B] py-4 text-xs font-bold uppercase tracking-wider text-[#FAD90C]"
+              >
+                {isPending ? "Submitting..." : "Submit Quote Request"}
+              </button>
+            </form>
+          )}
+
+          <p className="mt-4 text-center text-xs leading-6 text-[#AAA]">
             No payment required. Our team will contact you within 24 hours to
             discuss your order, confirm pricing, and arrange payment.
           </p>
+
+          <QuoteChoiceModal
+            open={showQuoteModal}
+            onClose={() => setShowQuoteModal(false)}
+            onContinueAsGuest={() => {
+              setShowQuoteModal(false);
+              setShowGuestForm(true);
+            }}
+          />
+
+          <SuccessModal
+            open={showSuccess}
+            onOpenChange={setShowSuccess}
+            title="Quote Submitted!"
+            description="Your quote request has been received. We'll review it and contact you shortly."
+          />
         </div>
       </div>
     </div>

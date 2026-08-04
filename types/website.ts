@@ -147,9 +147,19 @@ export interface AuthUser {
 }
 
 
+export interface CustomMeasurements {
+  footLength?: string;
+  footWidth?: string;
+  extra?: {
+    label: string;
+    value: string;
+  }[];
+}
+
 export interface QuoteItem {
   productId: string;
   productNameSnapshot: string;
+  customerNotes?: string;
 
   quantity: number;
   unitPriceSnapshot: number;
@@ -161,6 +171,7 @@ export interface QuoteItem {
   colorNameSnapshot?: string;
 
   customNotes?: string;
+  customMeasurements?: CustomMeasurements;
 }
 
 export interface QuoteStorage {
@@ -169,7 +180,7 @@ export interface QuoteStorage {
 }
 
 export interface QuoteItemPayload {
-  productId: string;
+  productId?: string;
   productNameSnapshot: string;
 
   variantLabelSnapshot?: string;
@@ -184,6 +195,7 @@ export interface QuoteItemPayload {
 }
 
 export interface CreateQuotePayload {
+  productId?:string
   guestName?: string;
   guestEmail?: string;
   guestPhone?: string;
@@ -197,6 +209,30 @@ export interface QuoteData {
   id: string;
   customerNotes?: string;
   items: QuoteItem[];
+  
   customerStatus: "pending" | "completed";
   status?: "pending" | "reviewing" | "approved" | "completed" | "cancelled";
 }
+export type QuoteDraft = {
+  guestName: string | null;
+  guestEmail: string | null;
+  guestPhone: string | null;
+  customerNotes: string | null;
+  customerStatus: "pending" | "completed";
+  items: [
+    {
+      productId: string;
+      productNameSnapshot: string | null;
+      imageUrlSnapshot: string | null;
+      shoeNameSnapshot: string | null;
+      toeStyleSnapshot: string | null;
+      size: number | null;
+      materialNameSnapshot: string | null;
+      colorNameSnapshot: string | null;
+      quantity: number;
+      unitPriceSnapshot: number | null;
+      customMeasurements: Record<string, unknown> | null;
+      customNotes: string | null;
+    }
+  ];
+};

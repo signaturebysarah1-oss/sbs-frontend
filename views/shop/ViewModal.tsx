@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from "next/image";
@@ -9,15 +10,15 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CreateQuotePayload, Product } from "@/types/website";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { addToQuote } from "@/services/cart";
-import { useCreateQuote } from "@/hooks/useCreateQuotes";
-import { createQuote } from "@/providers/quoteMutation";
-import { getCurrentSession } from "@/lib/seesion";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { postData } from "@/providers/mutations/Index";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { authFetchs } from "@/lib/api";
+import { supabase } from "@/lib/supabase";
+import { Session } from "@supabase/supabase-js";
 
 interface ViewModalProps {
   products: Product;
@@ -25,21 +26,68 @@ interface ViewModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
-  const [selectedColor, setSelectedColor] = useState(0);
+interface QuoteItem {
+  productId: string;
+  productNameSnapshot: string;
+  quantity: number;
+  unitPriceSnapshot: number;
+  variantLabelSnapshot?: string;
+  materialNameSnapshot?: string;
+  colorNameSnapshot?: string;
+  customNotes?: string;
+}
 
+interface Quote {
+  id: string;
+  referenceNumber: string;
+  profileId: string;
+  customerNotes: string;
+  customerStatus: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  submittedAt: string;
+  reviewedAt: string | null;
+  completedAt: string | null;
+  items: QuoteItem[];
+}
+
+interface QuotesResponse {
+  success: boolean;
+  message: string;
+  data: Quote[];
+}
+
+const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
+  const queryClient = useQueryClient();
+
+  const [selectedColor, setSelectedColor] = useState(0);
   const [selectedImage, setSelectedImage] = useState(
     products.images.find((img) => img.isPrimary)?.imageUrl ??
       products.images[0]?.imageUrl
   );
-
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [session, setSession] = useState<Session | null>();
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      setSession(session);
+    };
+
+    checkSession();
+  }, []);
 
   const handleAddToQuote = () => {
     addToQuote({
       productId: products.id,
       productNameSnapshot: products.name || "",
       quantity: 1,
+      imageUrlSnapshot: products.images[0].imageUrl || "",
       unitPriceSnapshot: products.basePrice,
       variantLabelSnapshot: selectedSize ? `EU ${selectedSize}` : undefined,
       materialNameSnapshot: products.materials[0]?.name,
@@ -47,64 +95,128 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
       customNotes: "",
     });
   
+    // toast.success("Added to quote") already fires inside addToQuote — don't duplicate it here
     onOpenChange(false);
   };
-  
-  const {
-    mutate: createQuote,
-    isPending,
-    isSuccess,
-    isError,
-    error,
-  } = useMutation({
-    mutationFn: (payload: CreateQuotePayload) =>
-      postData("api/quotes", payload),
-  
-    onSuccess: (data) => {
+  const { mutate: createQuote, isPending } = useMutation({
+    mutationFn: (payload: CreateQuotePayload) => postData("api/quotes", payload),
+
+    onSuccess: () => {
       toast.success("Added to quote");
-      console.log(data);
+      queryClient.invalidateQueries({ queryKey: ["all-quotes"] });
     },
-  
     onError: (error) => {
-      console.log(error.message);
+      console.error(error);
+      toast.error("Couldn't add to quote. Please try again.");
     },
   });
+
+  const { mutate: updateQuote, isPending: isUpdatingQuote } = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: CreateQuotePayload }) =>
+      authFetchs(`/api/quotes/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+
+    onSuccess: () => {
+      toast.success("Added to quote");
+      queryClient.invalidateQueries({ queryKey: ["all-quotes"] });
+      onOpenChange(false);
+    },
+
+    onError: (error) => {
+      console.error(error);
+      toast.error("Couldn't add to quote. Please try again.");
+    },
+  });
+
+  // Only fetch quotes for logged-in users — guests never hit the API
+  const { data: getquotes, isLoading: myLoading } = useQuery<QuotesResponse>({
+    queryKey: ["all-quotes"],
+    queryFn: () => authFetchs<QuotesResponse>("/api/quotes/my"),
+    enabled: !!session,
+  });
+
+  const allquotes: Quote[] = getquotes?.data ?? [];
+
+  const quotePayload: CreateQuotePayload = {
+    customerNotes: "",
+    items: [
+      {
+        productId: products.id,
+        productNameSnapshot: products.name || "",
+        quantity: 1,
+        unitPriceSnapshot: products.basePrice,
+        variantLabelSnapshot: selectedSize ? `EU ${selectedSize}` : undefined,
+        materialNameSnapshot: products.materials[0]?.name,
+        colorNameSnapshot: products.colors[selectedColor]?.name,
+        customNotes: "",
+        imageUrlSnapshot: products.images[0].imageUrl || "",
+      },
+    ],
+  };
+
   const handleQuoteAction = async () => {
-    const session = await getCurrentSession();
-  console.log(session,"session")
-    if (session) {
-          createQuote(
-        {
-          customerNotes: "",
-          items: [
-            {
-              productId: products.id,
-              productNameSnapshot: products.name || "",
-              quantity: 1,
-              unitPriceSnapshot: products.basePrice,
-              variantLabelSnapshot: selectedSize
-                ? `EU ${selectedSize}`
-                : undefined,
-              materialNameSnapshot: products.materials[0]?.name,
-              colorNameSnapshot: products.colors[selectedColor]?.name,
-              // customMeasurements: {},
-              customNotes: "",
-            },
-          ],
-        },
-        {
-          onSuccess: () => {
-            onOpenChange(false);
-          },
-          onError: (error) => {
-            console.error(error);
-          },
-        }
-      );;
-    } else {
+    // Guest path — pure localStorage, no network at all
+    if (!session) {
       handleAddToQuote();
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const latest = await queryClient.fetchQuery<QuotesResponse>({
+        queryKey: ["all-quotes"],
+        queryFn: () => authFetchs<QuotesResponse>("/api/quotes/my"),
+      });
+
+      const freshQuotes: Quote[] = latest?.data ?? [];
+      const pendingQuoteSummary = freshQuotes.find(
+        (item) => item.customerStatus === "pending"
+      );
+
+      if (pendingQuoteSummary?.id) {
+        // /api/quotes/my may not include items — fetch the full quote to be sure
+        const full = await queryClient.fetchQuery<{
+          success: boolean;
+          message: string;
+          data: Quote;
+        }>({
+          queryKey: ["quote", pendingQuoteSummary.id],
+          queryFn: () => authFetchs(`/api/quotes/${pendingQuoteSummary.id}`),
+        });
+
+        const pendingQuote = full?.data;
+
+        updateQuote({
+          id: pendingQuoteSummary.id,
+          payload: {
+            customerNotes: pendingQuote?.customerNotes || "",
+            items: [...(pendingQuote?.items || []), ...quotePayload.items],
+          },
+        });
+
+        return;
+      }
+
+      createQuote(quotePayload, {
+        onSuccess: () => {
+          onOpenChange(false);
+        },
+        onError: (error) => {
+          console.error(error);
+        },
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
+
+  const isBusy = isProcessing || isPending || isUpdatingQuote;
+  // Loading state only matters for logged-in users; guests never wait on this query
+  const isLoadingQuotes = !!session && myLoading;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="overflow-hidden p-0 lg:max-w-3xl">
@@ -241,9 +353,26 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
 
             <button
               onClick={handleQuoteAction}
-              className="rounded-[10px] flex justify-center items-center bg-[#0B0B0B] px-4 py-[15px] text-[11px] font-bold uppercase tracking-[0.12em] text-[#FAD90C] transition-colors hover:bg-[#1A1A1A]"
+              disabled={isBusy || isLoadingQuotes}
+              className={`rounded-[10px] flex cursor-pointer items-center justify-center px-4 py-[15px] text-[11px] font-bold uppercase tracking-[0.12em] transition-colors ${
+                isLoadingQuotes || isBusy
+                  ? "cursor-not-allowed bg-[#3A3A3A] text-[#D8C76A]"
+                  : "bg-[#0B0B0B] text-[#FAD90C] hover:bg-[#1A1A1A]"
+              }`}
             >
-             {isPending ?<Loader2 className="animate-spin"/> : "Add to Quote"}
+              {isLoadingQuotes ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading Product...
+                </>
+              ) : isBusy ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adding...
+                </>
+              ) : (
+                "Add to Quote"
+              )}
             </button>
 
             {products.isNewArrival && (

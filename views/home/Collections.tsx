@@ -66,7 +66,7 @@ const Collections = ({ data }: CollectionResponse) => {
                   {cat.name}
                 </div>
 
-                <Link href={`product?${cat.slug}`} className="mt-2.5 cursor-pointer flex items-center gap-1.5 text-[11px] text-[#F8F6F2]/60">
+                <Link href={`product?collection=${cat.slug}`} className="mt-2.5 cursor-pointer flex items-center gap-1.5 text-[11px] text-[#F8F6F2]/60">
                   <span>Explore</span>
                   <ArrowRight size={14} />
                 </Link>

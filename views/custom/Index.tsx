@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import ShoeStyle from "./orders/ShoeStyle";
 import Material from "./orders/Material";
 import Color from "./orders/Color";
-import Sole from "./orders/Sole";
 import ToeShape from "./orders/ToeShape";
 import Personalize from "./orders/Personalize";
 import Measurement from "./orders/Measurement";
@@ -20,19 +19,52 @@ const CustomPage = () => {
   const totalSteps = 6;
 
   const [step, setStep] = useState(1);
-  const [selections, setSelections] = useState<Record<string, string>>({});
+
+  const [selections, setSelections] = useState<Record<string, any>>({
+    shoeNameSnapshot: "",
+    material: "",
+    color: "",
+    toeStyleSnapshot: "",
+    // personalization: "",
+    customMeasurements: {},
+  });
+
 
   const steps = [
     "Shoe Style",
     "Material",
     "Color",
-    // "Sole",
-    // "Toe Shape",
-    "Personalize",
+    "Toe Shape",
+    // "Personalize",
     "Measurements",
     "Review",
   ];
 
+
+  // Load saved custom order
+  useEffect(() => {
+    const savedSelections = localStorage.getItem(
+      "sbs-custom-order"
+    );
+
+    if (savedSelections) {
+      setSelections(JSON.parse(savedSelections));
+    }
+  }, []);
+
+
+  // Save draft whenever selections change
+  useEffect(() => {
+    if (Object.keys(selections).length > 0) {
+      localStorage.setItem(
+        "sbs-custom-order",
+        JSON.stringify(selections)
+      );
+    }
+  }, [selections]);
+
+
+  // Restore current step from URL
   useEffect(() => {
     const urlStep = Number(searchParams.get("step"));
 
@@ -49,7 +81,9 @@ const CustomPage = () => {
   const changeStep = (newStep: number) => {
     if (newStep < 1 || newStep > totalSteps) return;
 
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(
+      searchParams.toString()
+    );
 
     params.set("step", String(newStep));
 
@@ -61,38 +95,90 @@ const CustomPage = () => {
   };
 
 
-  const select = (key: string, val: string) =>
+  const select = (
+    key: string,
+    value: any
+  ) => {
     setSelections((prev) => ({
       ...prev,
-      [key]: val,
+      [key]: value,
     }));
+  };
+
+
+  const clearCustomOrder = () => {
+    localStorage.removeItem(
+      "sbs-custom-order"
+    );
+
+    setSelections({
+      shoeNameSnapshot: "",
+      material: "",
+      color: "",
+      toeStyleSnapshot: "",
+      personalization: "",
+      customMeasurements: {},
+    });
+  };
 
 
   const renderStep = () => {
     switch (step) {
       case 1:
-        return <ShoeStyle selections={selections} select={select} />;
+        return (
+          <ShoeStyle
+            selections={selections}
+            select={select}
+          />
+        );
 
       case 2:
-        return <Material selections={selections} select={select} />;
+        return (
+          <Material
+            selections={selections}
+            select={select}
+          />
+        );
 
       case 3:
-        return <Color selections={selections} select={select} />;
-
-      // case 4:
-      //   return <Sole selections={selections} select={select} />;
-
-      // case 5:
-      //   return <ToeShape selections={selections} select={select} />;
+        return (
+          <Color
+            selections={selections}
+            select={select}
+          />
+        );
 
       case 4:
-        return <Personalize selections={selections} select={select} />;
+        return (
+          <ToeShape
+            selections={selections}
+            select={select}
+          />
+        );
+
+      // case 5:
+      //   return (
+      //     <Personalize
+      //       selections={selections}
+      //       select={select}
+      //     />
+      //   );
 
       case 5:
-        return <Measurement selections={selections} select={select} />;
+        return (
+          <Measurement
+            selections={selections}
+            select={select}
+          />
+        );
 
       case 6:
-        return <Review selections={selections} select={select} />;
+        return (
+          <Review
+            selections={selections}
+            select={select}
+          />
+        );
 
       default:
         return null;
@@ -102,6 +188,7 @@ const CustomPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F6F2] pt-[72px]">
+
       {/* Header */}
       <div className="bg-[#0B0B0B] px-8 py-16">
         <div className="mx-auto max-w-[900px]">
@@ -126,12 +213,16 @@ const CustomPage = () => {
               <div
                 key={s}
                 className={`flex items-center gap-1 ${
-                  i < steps.length - 1 ? "flex-1" : ""
+                  i < steps.length - 1
+                    ? "flex-1"
+                    : ""
                 }`}
               >
+
                 <button
                   onClick={() =>
-                    i + 1 < step && changeStep(i + 1)
+                    i + 1 < step &&
+                    changeStep(i + 1)
                   }
                   disabled={i + 1 >= step}
                   className={`flex min-w-10 flex-col items-center gap-1 px-1 ${
@@ -198,7 +289,7 @@ const CustomPage = () => {
 
 
       {/* Content */}
-      <div className="mx-auto  max-w-[900px] px-8 py-14">
+      <div className="mx-auto max-w-[900px] px-8 py-14">
 
         {renderStep()}
 
@@ -207,7 +298,9 @@ const CustomPage = () => {
         <div className="mt-14 flex justify-between border-t border-[#EAE6DD] pt-8">
 
           <button
-            onClick={() => changeStep(step - 1)}
+            onClick={() =>
+              changeStep(step - 1)
+            }
             disabled={step === 1}
             className={`btn-outline ${
               step === 1
@@ -221,7 +314,9 @@ const CustomPage = () => {
 
           {step < totalSteps && (
             <button
-              onClick={() => changeStep(step + 1)}
+              onClick={() =>
+                changeStep(step + 1)
+              }
               className="btn-gold"
             >
               Next Step →
@@ -235,5 +330,6 @@ const CustomPage = () => {
     </div>
   );
 };
+
 
 export default CustomPage;

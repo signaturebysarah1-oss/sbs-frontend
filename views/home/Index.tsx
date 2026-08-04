@@ -56,15 +56,15 @@ const HomePage = () => {
   }
   
   
-  if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F8F6F2]">
-        <span className="text-sm font-medium uppercase tracking-[0.2em] text-[#0B0B0B]">
-          Failed to load homepage
-        </span>
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className="flex min-h-screen items-center justify-center bg-[#F8F6F2]">
+  //       <span className="text-sm font-medium uppercase tracking-[0.2em] text-[#0B0B0B]">
+  //         Failed to load homepage
+  //       </span>
+  //     </div>
+  //   );
+  // }
   
 
   // if (isLoading) {

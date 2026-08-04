@@ -29,3 +29,39 @@ export const authFetch = async (
     },
   });
 };
+
+
+export const authFetchs = async <T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> => {
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+
+  const token = session?.access_token;
+
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {}),
+      ...options.headers,
+    },
+  });
+
+
+  if (!response.ok) {
+    throw new Error("Request failed");
+  }
+
+
+  return response.json();
+};

@@ -8,6 +8,8 @@ import { useState } from "react";
 import { Product } from "@/types/website";
 import { getProducts } from "@/providers/get";
 import { useQuery } from "@tanstack/react-query";
+import ProductSkeleton from "./Skeleton";
+import EmptyProductsState from "../EmptyState";
 
 interface products {
   products: Product[];
@@ -23,24 +25,23 @@ const Products = ({ products, error, isLoading, category }: products) => {
   if (isLoading) {
     return (
       <Container>
-        <div className="my-20 flex justify-center">Loading...</div>
+        <ProductSkeleton />{" "}
       </Container>
     );
   }
 
-  if (error) {
-    return (
-      <Container>
-        <div className="my-20 text-center">Failed to load products.</div>
-      </Container>
-    );
-  }
+ 
+  // Empty
+if (products.length === 0) {
+  return (
+    <EmptyProductsState />
+
+  );
+}
 
   return (
     <Container>
-     
       <div className="my-8 grid grid-cols-3 gap-5">
-      
         {products.map((product) => {
           const primaryImage =
             product.images.find((img) => img.isPrimary) ?? product.images[0];

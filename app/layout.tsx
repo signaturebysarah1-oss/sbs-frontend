@@ -32,26 +32,22 @@ export default function RootLayout({
       lang="en"
       className={`${playfair.variable} ${workSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-      <Toaster
-  position="top-right"
-  toastOptions={{
-    classNames: {
-      success:
-        "bg-[#0B0B0B] border border-[#FAD90C] text-white",
-      error:
-        "bg-[#0B0B0B] border border-red-500 text-white",
-      info:
-        "bg-[#0B0B0B] border border-[#FAD90C] text-white",
-    },
-  }}
-/>      <QueryProvider>
-
-        <Header/>
-        {children}
-        <Footer/>
+      <body className="min-h-screen flex flex-col">
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            classNames: {
+              success: "bg-[#0B0B0B] border border-[#FAD90C] text-white",
+              error: "bg-[#0B0B0B] border border-red-500 text-white",
+              info: "bg-[#0B0B0B] border border-[#FAD90C] text-white",
+            },
+          }}
+        />
+        <QueryProvider>
+          <Header />
+          <div className="">{children}</div>
+          <Footer />
         </QueryProvider>
-
       </body>
     </html>
   );

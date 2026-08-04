@@ -7,7 +7,7 @@ interface Props {
   open: boolean;
   onClose: () => void;
   onContinueAsGuest: () => void;
-  items:QuoteItem[]
+  items?:QuoteItem[]
 }
 
 const QuoteChoiceModal = ({
@@ -21,7 +21,7 @@ const QuoteChoiceModal = ({
  const loginWithGoogle = async () => {
   localStorage.setItem(
     "auth_redirect",
-    window.location.pathname
+    window.location.pathname + window.location.search
   );
 
   localStorage.setItem(

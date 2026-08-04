@@ -7,16 +7,45 @@ import {
   XIcon,
   ShoppingBagIcon,
   HistoryIcon,
+  CircleUserRound,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Container from "../shared/Container";
 import Link from "next/link";
+import LogoutButton from "./logout";
+import { useQuery } from "@tanstack/react-query";
+import { getPendingQuote } from "@/providers/quoteQuery";
+import { supabase } from "@/lib/supabase";
+import { Session } from "@supabase/supabase-js";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+const QUOTE_KEY = "sbs-quote";
+
+const readGuestItemCount = (): number => {
+  try {
+    const stored = localStorage.getItem(QUOTE_KEY);
+    if (!stored) return 0;
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed.length : 0;
+  } catch {
+    return 0;
+  }
+};
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [cartCount] = useState(2);
+  const [session, setSession] = useState<Session | null>();
+  const [guestCartCount, setGuestCartCount] = useState(0);
 
   const pathname = usePathname();
 
@@ -28,11 +57,62 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      setSession(session);
+    };
+
+    checkSession();
+  }, []);
+
+  // Guest cart count: read on mount, and refresh whenever it changes —
+  // either from another tab (native "storage" event) or the same tab
+  // (custom "sbs-quote-updated" event dispatched from cart.ts).
+  useEffect(() => {
+    if (session) return;
+
+    const refreshGuestCount = () => setGuestCartCount(readGuestItemCount());
+
+    refreshGuestCount();
+
+    window.addEventListener("storage", refreshGuestCount);
+    window.addEventListener("sbs-quote-updated", refreshGuestCount);
+
+    return () => {
+      window.removeEventListener("storage", refreshGuestCount);
+      window.removeEventListener("sbs-quote-updated", refreshGuestCount);
+    };
+  }, [session]);
+
+  const { data: pendingQuote } = useQuery({
+    queryKey: ["pending-quote", session?.user.id],
+    queryFn: getPendingQuote,
+    enabled: !!session,
+  });
+
+  const cartCount = session ? pendingQuote?.items?.length ?? 0 : guestCartCount;
+  const loginWithGoogle = async () => {
+    localStorage.setItem(
+      "auth_redirect",
+      window.location.pathname + window.location.search
+    );
+
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+  };
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/product" },
     { label: "Custom Order", href: "/custom" },
-    // { label: "About", href: "/about" },
+    { label: "Academy", href: "/academy" },
     { label: "Size Guide", href: "/size-guide" },
     { label: "Contact", href: "/contact" },
   ];
@@ -135,9 +215,47 @@ const Header = () => {
               >
                 <MenuIcon size={24} />
               </button>
-              <Link href="history" className="hidden md:block text-white/70 hover:text-gold transition">
-                <HistoryIcon size={20} />
-              </Link>
+
+              <DropdownMenu>
+  <DropdownMenuTrigger
+    className="bg-transparent px-0 hover:bg-transparent cursor-pointer border-none"
+    render={<Button variant="outline" />}
+  >
+    <CircleUserRound className="text-white" size={40} />
+  </DropdownMenuTrigger>
+
+  <DropdownMenuContent className="w-50">
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>My Account</DropdownMenuLabel>
+      {/* <DropdownMenuItem>History</DropdownMenuItem> */}
+    </DropdownMenuGroup>
+
+    <DropdownMenuGroup>
+      <DropdownMenuItem>
+        <Link
+          href="history"
+          className="flex items-center gap-2 text-black hover:text-gold transition"
+        >
+          <HistoryIcon className="text-black" size={16} />
+          History
+        </Link>
+      </DropdownMenuItem>
+
+      <DropdownMenuItem>
+        {session ? (
+          <LogoutButton />
+        ) : (
+          <button
+            onClick={loginWithGoogle}
+            className="w-full cursor-pointer flex items-center gap-2 rounded-xl text-[10px] font-semibold uppercase tracking-wider text-black"
+          >
+            <img src="/googles.png" className="w-4" /> Login with Google
+          </button>
+        )}
+      </DropdownMenuItem>
+    </DropdownMenuGroup>
+  </DropdownMenuContent>
+</DropdownMenu>
             </div>
           </div>
         </Container>

@@ -1,13 +1,16 @@
 // providers/quoteQuery.ts
 
 import { authFetch } from "@/lib/api";
-import { QuoteData } from "@/types/website";
+import { QuoteData, QuoteItem } from "@/types/website";
 
 interface QuoteListResponse {
   data?: Array<Omit<QuoteData, "items"> & { items?: QuoteData["items"] }>;
 }
 
 interface QuoteDetailResponse {
+  customerNotes?: string;
+  id: string;
+  items: QuoteItem[];
   data?: QuoteData;
 }
 

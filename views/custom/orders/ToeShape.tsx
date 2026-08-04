@@ -45,9 +45,9 @@ interface ShoeStyleProps {
               {toeShapes.map((t) => (
                 <button
                   key={t.id}
-                  onClick={() => select("toe", t.id)}
+                  onClick={() => select("toeStyleSnapshot", t.id)}
                   style={{
-                    background: selections.toe === t.id ? "#0B0B0B" : "#fff",
+                    background: selections.toeStyleSnapshot === t.id ? "#0B0B0B" : "#fff",
                     border: `2px solid ${
                       selections.toe === t.id ? "#FAD90C" : "#EAE6DD"
                     }`,
@@ -63,7 +63,7 @@ interface ShoeStyleProps {
                       fontFamily: "var(--font-display)",
                       fontSize: "20px",
                       fontWeight: 600,
-                      color: selections.toe === t.id ? "#FAD90C" : "#0B0B0B",
+                      color: selections.toeStyleSnapshot === t.id ? "#FAD90C" : "#0B0B0B",
                       marginBottom: "8px",
                     }}
                   >
@@ -74,7 +74,7 @@ interface ShoeStyleProps {
                       fontFamily: "var(--font-sans)",
                       fontSize: "13px",
                       color:
-                        selections.toe === t.id
+                        selections.toeStyleSnapshot === t.id
                           ? "rgba(248,246,242,0.6)"
                           : "#888",
                     }}
