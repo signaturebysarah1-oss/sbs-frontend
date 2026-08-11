@@ -13,6 +13,11 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    "rules": {
+      "tailwindcss/no-arbitrary-value": "off"
+    }
+  }
 ]);
 
 export default eslintConfig;

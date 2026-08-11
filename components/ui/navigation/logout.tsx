@@ -23,12 +23,14 @@ const LogoutButton = () => {
 
   return (
     <button
-      onClick={handleLogout}
-      className="flex items-center gap-1 rounded-lg text-sm font-semibold text-[#0B0B0B] transition "
+      onClick={(e) => {
+        e.stopPropagation(); // Stops native event bubbling conflicts
+        handleLogout;
+      }}
+      className="flex items-center gap-1 rounded-lg text-sm font-semibold text-near-black transition "
     >
-      <LogOut className="h-[0.5px] w-[0.5px]" />
-
       Logout
+      <LogOut className="h-[0.5px] w-[0.5px]" />
 
     </button>
   );

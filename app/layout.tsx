@@ -5,6 +5,9 @@ import Header from "@/components/ui/navigation/Header";
 import Footer from "@/components/ui/navigation/Footer";
 import QueryProvider from "@/providers/QueryProvider";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/providers/AuthProvider";
+import "aos/dist/aos.css";
+import AOSProvider from "@/providers/AOSProviders";
 const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
@@ -37,16 +40,19 @@ export default function RootLayout({
           position="top-right"
           toastOptions={{
             classNames: {
-              success: "bg-[#0B0B0B] border border-[#FAD90C] text-white",
-              error: "bg-[#0B0B0B] border border-red-500 text-white",
-              info: "bg-[#0B0B0B] border border-[#FAD90C] text-white",
+              success: "bg-near-black border border-gold text-white",
+              error: "bg-near-black border border-red-500 text-white",
+              info: "bg-near-black border border-gold text-white",
             },
           }}
         />
         <QueryProvider>
-          <Header />
-          <div className="">{children}</div>
-          <Footer />
+          <AuthProvider>
+            <Header />
+            <AOSProvider />
+            {children}
+            <Footer />
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

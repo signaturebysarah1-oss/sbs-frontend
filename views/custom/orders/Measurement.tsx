@@ -14,6 +14,8 @@ interface CustomMeasurements {
   rightFront: string;
   leftBack: string;
   rightBack: string;
+  leftLength: string;
+  rightLength: string;
   extra: ExtraMeasurement[];
 }
 
@@ -23,15 +25,15 @@ interface MeasurementProps {
 }
 
 const Measurement = ({ selections, select }: MeasurementProps) => {
-  const [measurements, setMeasurements] = useState<CustomMeasurements>(
-    selections.customMeasurements || {
-      leftFront: "",
-      rightFront: "",
-      leftBack: "",
-      rightBack: "",
-      extra: [],
-    }
-  );
+  const [measurements, setMeasurements] = useState<CustomMeasurements>({
+    leftFront: selections.customMeasurements?.leftFront ?? "",
+    rightFront: selections.customMeasurements?.rightFront ?? "",
+    leftBack: selections.customMeasurements?.leftBack ?? "",
+    rightBack: selections.customMeasurements?.rightBack ?? "",
+    leftLength: selections.customMeasurements?.leftLength ?? "",
+    rightLength: selections.customMeasurements?.rightLength ?? "",
+    extra: selections.customMeasurements?.extra ?? [],
+  });
   const [openMeasurementGuide, setOpenMeasurementGuide] = useState(false);
 
   useEffect(() => {
@@ -80,17 +82,19 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
       <div>
         <div className="mb-8 flex items-start justify-between">
           <div>
-            <h2 className="mb-2 font-display text-4xl font-bold text-[#0B0B0B]">
+            <h2 className="mb-2 font-display text-4xl font-bold text-near-black">
               Measurements
             </h2>
 
             <p className="text-sm text-[#777]">
-              A perfect fit starts with accurate measurements.
+              A perfect fit starts with accurate measurements. Please
+              measure both feet in centimeters (cm) — one foot may be
+              slightly larger than the other.
             </p>
             <button
               type="button"
               onClick={() => setOpenMeasurementGuide(true)}
-              className="rounded-xl mt-3 bg-black px-5 py-3 text-sm font-semibold text-[white] transition hover:bg-[#FFF9D9]"
+              className="rounded-xl mt-3 bg-black px-5 py-3 text-sm font-semibold text-[white] transition cursor-pointer"
             >
               How to Measure
             </button>
@@ -102,7 +106,7 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
             {/* Front */}
             <div className="grid gap-10 grid-cols-2 w-full justify-between">
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#0B0B0B]">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-near-black">
                   Left Foot Front (cm)
                 </label>
 
@@ -114,12 +118,12 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
                     updateMeasurement("leftFront", e.target.value)
                   }
                   placeholder="e.g. 27"
-                  className="w-full rounded-xl border border-[#EAE6DD] bg-white px-4 py-3 outline-none transition focus:border-[#FAD90C]"
+                  className="w-full rounded-xl border border-border bg-white px-4 py-3 outline-none transition focus:border-gold"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#0B0B0B]">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-near-black">
                   Right Foot Front (cm)
                 </label>
 
@@ -131,7 +135,7 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
                     updateMeasurement("rightFront", e.target.value)
                   }
                   placeholder="e.g. 10"
-                  className="w-full rounded-xl border border-[#EAE6DD] bg-white px-4 py-3 outline-none transition focus:border-[#FAD90C]"
+                  className="w-full rounded-xl border border-border bg-white px-4 py-3 outline-none transition focus:border-gold"
                 />
               </div>
             </div>
@@ -139,7 +143,7 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
             {/* Back */}
             <div className="grid gap-10 grid-cols-2 w-full justify-between mt-10">
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#0B0B0B]">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-near-black">
                   Left Foot Back (cm)
                 </label>
 
@@ -151,12 +155,12 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
                     updateMeasurement("leftBack", e.target.value)
                   }
                   placeholder="e.g. 27"
-                  className="w-full rounded-xl border border-[#EAE6DD] bg-white px-4 py-3 outline-none transition focus:border-[#FAD90C]"
+                  className="w-full rounded-xl border border-border bg-white px-4 py-3 outline-none transition focus:border-gold"
                 />
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-[#0B0B0B]">
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-near-black">
                   Right Foot Back (cm)
                 </label>
 
@@ -168,7 +172,44 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
                     updateMeasurement("rightBack", e.target.value)
                   }
                   placeholder="e.g. 10"
-                  className="w-full rounded-xl border border-[#EAE6DD] bg-white px-4 py-3 outline-none transition focus:border-[#FAD90C]"
+                  className="w-full rounded-xl border border-border bg-white px-4 py-3 outline-none transition focus:border-gold"
+                />
+              </div>
+            </div>
+
+            {/* Length */}
+            <div className="grid gap-10 grid-cols-2 w-full justify-between mt-10">
+              <div>
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-near-black">
+                  Left Foot Length (cm)
+                </label>
+
+                <input
+                  type="number"
+                  step="0.1"
+                  value={measurements.leftLength}
+                  onChange={(e) =>
+                    updateMeasurement("leftLength", e.target.value)
+                  }
+                  placeholder="e.g. 26.5"
+                  className="w-full rounded-xl border border-border bg-white px-4 py-3 outline-none transition focus:border-gold"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-near-black">
+                  Right Foot Length (cm)
+                </label>
+
+                <input
+                  type="number"
+                  step="0.1"
+                  value={measurements.rightLength}
+                  onChange={(e) =>
+                    updateMeasurement("rightLength", e.target.value)
+                  }
+                  placeholder="e.g. 26.5"
+                  className="w-full rounded-xl border border-border bg-white px-4 py-3 outline-none transition focus:border-gold"
                 />
               </div>
             </div>
@@ -176,10 +217,10 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
             {measurements.extra.map((item, index) => (
               <div
                 key={index}
-                className="mt-8 rounded-xl border border-[#EAE6DD] bg-white p-5"
+                className="mt-8 rounded-xl border border-border bg-white p-5"
               >
                 <div className="mb-4 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-[#0B0B0B]">
+                  <p className="text-sm font-semibold text-near-black">
                     Extra Measurement {index + 1}
                   </p>
 
@@ -205,7 +246,7 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
                         updateExtraMeasurement(index, "label", e.target.value)
                       }
                       placeholder="e.g. Ankle Circumference"
-                      className="w-full rounded-xl border border-[#EAE6DD] px-4 py-3 outline-none transition focus:border-[#FAD90C]"
+                      className="w-full rounded-xl border border-border px-4 py-3 outline-none transition focus:border-gold"
                     />
                   </div>
 
@@ -221,7 +262,7 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
                         updateExtraMeasurement(index, "value", e.target.value)
                       }
                       placeholder="e.g. 22 cm"
-                      className="w-full rounded-xl border border-[#EAE6DD] px-4 py-3 outline-none transition focus:border-[#FAD90C]"
+                      className="w-full rounded-xl border border-border px-4 py-3 outline-none transition focus:border-gold"
                     />
                   </div>
                 </div>
@@ -241,20 +282,20 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
       </div>
 
       <div className="mt-10 w-full">
-        <label className="mb-4 block text-xs font-semibold uppercase tracking-wider text-[#0B0B0B]">
+        <label className="mb-4 block text-xs font-semibold uppercase tracking-wider text-near-black">
           Size Conversion Chart
         </label>
 
-        <div className="overflow-hidden rounded-2xl border border-[#EAE6DD]">
+        <div className="overflow-hidden rounded-2xl border border-border">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-xs">
               <thead>
-                <tr className="bg-[#0B0B0B]">
+                <tr className="bg-near-black">
                   {["EU", "UK", "US Men's", "US Women's", "cm"].map(
                     (head) => (
                       <th
                         key={head}
-                        className="px-3 py-4 text-center text-[10px] font-semibold uppercase tracking-wider text-[#FAD90C]"
+                        className="px-3 py-4 text-center text-[10px] font-semibold uppercase tracking-wider  text-gold"
                       >
                         {head}
                       </th>
@@ -276,15 +317,15 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
                 ].map((row, index) => (
                   <tr
                     key={row[0]}
-                    className={`border-b border-[#EAE6DD] ${
-                      index % 2 === 0 ? "bg-[#F8F6F2]" : "bg-white"
+                    className={`border-b border-border ${
+                      index % 2 === 0 ? "bg-off-white" : "bg-white"
                     }`}
                   >
                     {row.map((cell, i) => (
                       <td
                         key={i}
                         className={`px-3 py-4 text-center ${
-                          i === 0 ? "font-bold text-[#0B0B0B]" : "text-[#666]"
+                          i === 0 ? "font-bold text-near-black" : "text-[#666]"
                         }`}
                       >
                         {cell}
@@ -301,11 +342,14 @@ const Measurement = ({ selections, select }: MeasurementProps) => {
       <MeasurementGuideModal
         open={openMeasurementGuide}
         onClose={() => setOpenMeasurementGuide(false)}
+        
         values={{
           leftFront: measurements.leftFront,
           rightFront: measurements.rightFront,
           leftBack: measurements.leftBack,
           rightBack: measurements.rightBack,
+          leftLength: measurements.leftLength,
+          rightLength: measurements.rightLength,
         }}
         onChange={updateMeasurement}
       />

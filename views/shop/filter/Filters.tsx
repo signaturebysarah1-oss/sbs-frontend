@@ -5,7 +5,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Product } from "@/types/website";
-import ProductFiltersSidebarSkeleton from "./FilterSkeleton";
 
 interface products {
   products: Product[];
@@ -13,10 +12,7 @@ interface products {
   isLoading: boolean;
 }
 
-const ProductFiltersSidebar = ({ products,isLoading }: products) => {
-  // const allSizes = products.flatMap((product) =>
-  //   product.sizes?.map((item) => item.toString()) ?? []
-  // );
+const ProductFiltersSidebar = ({ products, isLoading }: products) => {
   const allSizes = products.flatMap(
     (product) => product.sizes?.map((size) => size.toString()) ?? []
   );
@@ -49,15 +45,15 @@ const ProductFiltersSidebar = ({ products,isLoading }: products) => {
 
   const materialsMap = new Map(allMaterials.map((item) => [item.name, item]));
 
-  // const collections = products.map((item) => (
-  //   item.collections.map((item) => item)
-  // ))
   const collections = [
     ...new Set(
-      products.flatMap((item) => item.collections?.map((c) => ({
-        name:c.name,
-        slug:c.slug
-      })) || [])
+      products.flatMap(
+        (item) =>
+          item.collections?.map((c) => ({
+            name: c.name,
+            slug: c.slug,
+          })) || []
+      )
     ),
   ];
   console.log(collections, "collections");
@@ -101,16 +97,14 @@ const ProductFiltersSidebar = ({ products,isLoading }: products) => {
   const clearFilters = () => {
     router.push("product");
   };
-if(isLoading){
-  return <ProductFiltersSidebarSkeleton/>
-}
+
   return (
-    <aside className="w-full rounded-xl border h-fit  bg-white p-5 lg:sticky lg:top-20 lg:w-72">
-      <div className="h-[90vh] overflow-scroll space-y-6  [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <aside className="w-full rounded-xl lg:border h-fit  bg-white px-5 lg:p-5 lg:sticky lg:top-20 lg:w-72">
+      <div className="h-[90vh] overflow-scroll space-y-6  [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] scrollbar-none">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Filters</h2>
           <Button
-            className="inline-block rounded-lg bg-[#0B0B0B] px-2.5 py-[3px] text-[9px] font-bold uppercase tracking-[0.12em] text-[#FAD90C]"
+            className="inline-block rounded-lg bg-near-black px-2.5 py-0.75 text-[9px] font-bold uppercase tracking-[0.12em]  text-gold"
             variant="ghost"
             size="sm"
             onClick={clearFilters}

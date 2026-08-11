@@ -1,7 +1,7 @@
 import { QuoteItem } from "@/types/website";
 import { toast } from "sonner";
 
-const QUOTE_KEY = "sbs-quote";
+const QUOTE_KEY = "quest-cart";
 
 export const getQuote = (): QuoteItem[] => {
   if (typeof window === "undefined") return [];

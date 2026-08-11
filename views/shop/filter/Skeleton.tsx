@@ -2,14 +2,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const ProductSkeleton = () => {
   return (
-    <div className="my-8 grid grid-cols-3 gap-5">
+    <div className="my-8 grid grid-cols-2 lg:grid-cols-3 gap-5">
       {Array.from({ length: 9 }).map((_, index) => (
         <div
           key={index}
           className="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50"
         >
           {/* Image */}
-          <Skeleton className="aspect-[3/4] w-full rounded-none bg-zinc-300" />
+          <Skeleton className="aspect-3/4 w-full rounded-none bg-zinc-300" />
 
           <div className="space-y-4 p-5">
             <Skeleton className="h-2 w-20 bg-zinc-300" />

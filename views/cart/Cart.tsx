@@ -35,7 +35,7 @@ const QuoteItemCard = ({
   return (
     <div
       key={`${item.productId}-${item.colorNameSnapshot}`}
-      className="overflow-hidden rounded-2xl border border-[#EAE6DD] bg-white"
+      className="overflow-hidden rounded-2xl border border-border bg-white"
     >
       <div className="flex">
         <img
@@ -52,13 +52,13 @@ const QuoteItemCard = ({
 
             <div className="mt-3 flex gap-2">
               {item.materialNameSnapshot && (
-                <span className="rounded bg-[#F8F6F2] px-3 py-1 text-xs">
+                <span className="rounded bg-off-white px-3 py-1 text-xs">
                   {item.materialNameSnapshot}
                 </span>
               )}
 
               {item.colorNameSnapshot && (
-                <span className="flex items-center justify-center gap-1 rounded bg-[#F8F6F2] px-3 py-1 text-xs">
+                <span className="flex items-center justify-center gap-1 rounded bg-off-white px-3 py-1 text-xs">
                   <div
                     className="h-1.5 w-1.5 rounded-full"
                     style={{
@@ -102,7 +102,7 @@ const QuoteItemCard = ({
                       value={measurements}
                       onChange={(e) => setMeasurements(e.target.value)}
                       placeholder="Example: Width: 2cm, Length: 5cm"
-                      className="w-full rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] p-3 text-sm outline-none"
+                      className="w-full rounded-lg border border-border bg-off-white p-3 text-sm outline-none"
                     />
                   </div>
 
@@ -116,14 +116,14 @@ const QuoteItemCard = ({
                       value={customNotes}
                       onChange={(e) => setCustomNotes(e.target.value)}
                       placeholder="Special requests..."
-                      className="w-full rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] p-3 text-sm outline-none"
+                      className="w-full rounded-lg border border-border bg-off-white p-3 text-sm outline-none"
                     />
                   </div>
                 </div>
 
                 <button
                   onClick={() => onSaveCustomization(item)}
-                  className="rounded bg-[#0B0B0B] px-5 py-3 text-xs font-bold uppercase text-[#FAD90C]"
+                  className="rounded bg-near-black px-5 py-3 text-xs font-bold uppercase  text-gold"
                 >
                   Save Changes
                 </button>

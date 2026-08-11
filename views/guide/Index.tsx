@@ -46,7 +46,7 @@ Back Width: ${measurements.rightBack || "-"} cm
   };
 
   return (
-    <section className="bg-[#F8F6F2] py-20">
+    <section className="bg-off-white py-20">
       <div className="mx-auto max-w-6xl px-6">
 
         {/* Header */}
@@ -284,7 +284,7 @@ leading-8 text-[#666]
 <div className="
 flex min-h-[300px]
 items-center justify-center
-rounded-2xl bg-[#F8F6F2]
+rounded-2xl bg-off-white
 ">
 
 {/* Replace with your illustration */}

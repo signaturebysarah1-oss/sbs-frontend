@@ -22,3 +22,13 @@ export async function getMyQuotes() {
 
   return res.json();
 }
+
+export async function authQuery(url:string) {
+  const res = await authFetch(url);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch quote history");
+  }
+
+  return res.json();
+}

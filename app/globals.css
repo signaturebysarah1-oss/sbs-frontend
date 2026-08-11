@@ -1,3 +1,4 @@
+
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -140,8 +141,7 @@
   --color-border: #EAE6DD;
   --color-dark-text: #1E1E1E;
   --font-display: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Work Sans', system-ui, sans-serif;
-}
+  --font-sans: 'Work Sans', system-ui, sans-serif; }
 
 * {
   box-sizing: border-box;

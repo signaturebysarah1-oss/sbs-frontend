@@ -30,17 +30,17 @@
 //           <div className="py-10">
 //             <div className="mb-8 flex items-center gap-3">
 //               <span className="gold-line" />
-//               <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#0B0B0B]">
+//               <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-near-black">
 //                 Abuja · Nigeria · Est. 2020
 //               </span>
 //             </div>
 
-//             <h1 className="mb-7 text-[70px] font-display leading-18.5 font-bold  tracking-[-0.01em] text-[#0B0B0B]">
+//             <h1 className="mb-7 text-[70px] font-display leading-18.5 font-bold  tracking-[-0.01em] text-near-black">
 //               Handcrafted
 //               <br />
 //               Leather Footwear
 //               <br />
-//               <em className="font-normal italic  text-[#0B0B0B]">
+//               <em className="font-normal italic  text-near-black">
 //                 Made for Distinction.
 //               </em>
 //             </h1>

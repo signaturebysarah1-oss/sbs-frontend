@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
-import { getProducts } from "@/providers/get";
 import { HeroCarousel } from "@/types/website";
 
 const slideVariants = {
@@ -19,6 +17,17 @@ const slideVariants = {
   }),
 };
 
+const FALLBACK_IMAGES = [
+  "https://images.unsplash.com/photo-1591884807537-0bce39888fe0?w=600&h=800&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1641893843833-a006778dc00b?w=700&h=900&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1653868250624-21d56ad36602?w=800&h=1000&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1563433337461-5b65f0834f3a?w=800&h=1000&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1653868250624-21d56ad36602?w=800&h=1000&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1711356240240-2516c04b3585?w=900&h=1100&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1711356240240-2516c04b3585?w=900&h=1100&fit=crop&auto=format",
+  "https://images.unsplash.com/photo-1570800493677-12a7ad3d4d86?w=700&h=900&fit=crop&auto=format",
+];
+
 interface HeroAnimation {
   data: HeroCarousel[];
 }
@@ -30,17 +39,10 @@ const HeroAnimation = ({ data }: HeroAnimation) => {
   const [slideDirection, setSlideDirection] = useState(1);
   const [isHoveringImage, setIsHoveringImage] = useState(false);
 
-  // const {
-  //   data,
-  //   isLoading,
-  //   error,
-  // } = useQuery({
-  //   queryKey: ["hero-carousel"],
-  //   queryFn: () => getProducts("api/home/carousel"),
-  // });
-
   const heroImages =
-    data?.map((item: { imageUrl: string }) => item.imageUrl) || [];
+    data && data.length > 0
+      ? data.map((item: { imageUrl: string }) => item.imageUrl)
+      : FALLBACK_IMAGES;
 
   const showImage = (nextImage: number) => {
     if (nextImage === activeImage) return;
@@ -62,22 +64,10 @@ const HeroAnimation = ({ data }: HeroAnimation) => {
     return () => window.clearInterval(interval);
   }, [isHoveringImage, heroImages.length]);
 
-  // if (isLoading) {
-  //   return <div className="flex h-screen items-center justify-center">Loading...</div>;
-  // }
-
-  // if (error || heroImages.length === 0) {
-  //   return (
-  //     <div className="flex h-screen items-center justify-center">
-  //       Failed to load carousel images
-  //     </div>
-  //   );
-  // }
-
   return (
     <div>
       <div className="relative flex h-[calc(100vh-72px)] max-h-[780px] items-center justify-center">
-        <div className="absolute top-[10%] right-[6%] z-0 h-[80%] w-[65%] rounded-[20px] border border-[#FAD90C]/25" />
+        <div className="absolute top-[10%] right-[6%] z-0 h-[80%] w-[65%] rounded-[20px] border border-gold/25" />
 
         <div
           className="img-zoom relative z-[1] h-[85%] w-[80%] overflow-hidden rounded-[20px] shadow-[0_32px_80px_rgba(0,0,0,0.12)]"
@@ -111,10 +101,10 @@ const HeroAnimation = ({ data }: HeroAnimation) => {
             </motion.div>
           </AnimatePresence>
 
-          <div className="absolute right-0 bottom-0 left-0 z-[1] h-[30px] bg-gradient-to-r from-black to-transparent" />
+          <div className="absolute right-0 bottom-0 left-0 z-[1] h-[30px] bg-linear-to-r from-black to-transparent" />
         </div>
 
-        <div className="pointer-events-none absolute bottom-[4%] left-[6%] z-[1] h-20 w-60 rounded-full bg-gradient-to-r from-[#E3E0D9]/85 via-[#E3E0D9]/45 to-transparent blur-xl" />
+        <div className="pointer-events-none absolute bottom-[4%] left-[6%] z-[1] h-20 w-60 rounded-full bg-linear-to-r from-[#E3E0D9]/85 via-[#E3E0D9]/45 to-transparent blur-xl" />
 
         <div
           className="absolute bottom-[7.5%] left-[13%] z-[2] flex items-center gap-1"
@@ -140,7 +130,7 @@ const HeroAnimation = ({ data }: HeroAnimation) => {
                   }}
                   className={
                     isActive
-                      ? "h-0.5 rounded-full bg-[#FAD90C]"
+                      ? "h-0.5 rounded-full bg-gold"
                       : "h-0.5 rounded-full bg-white"
                   }
                   animate={{
@@ -153,8 +143,8 @@ const HeroAnimation = ({ data }: HeroAnimation) => {
           })}
         </div>
 
-        <div className="absolute bottom-[14%] left-0 z-[2] rounded-xl bg-[#0B0B0B] px-5 py-4 text-[#F8F6F2] shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
-          <div className="mb-1.5 text-[9px] uppercase tracking-[0.18em] text-[#FAD90C]">
+        <div className="absolute bottom-[14%] left-0 z-[2] rounded-xl bg-near-black px-5 py-4 text-off-white shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
+          <div className="mb-1.5 text-[9px] uppercase tracking-[0.18em]  text-gold">
             New Arrival
           </div>
 
@@ -162,7 +152,7 @@ const HeroAnimation = ({ data }: HeroAnimation) => {
             The Abuja Loafer
           </div>
 
-          <div className="mt-1 text-xs text-[#F8F6F2]/60">
+          <div className="mt-1 text-xs text-off-white/60">
             Full Grain Leather · ₦185,000
           </div>
         </div>

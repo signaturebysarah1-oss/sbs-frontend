@@ -1,4 +1,4 @@
-import { authFetch } from "../get/authfetch";
+import { authFetch } from "../query/authfetch";
 
 export const postData = async <T>(
   endpoint: string,

@@ -15,7 +15,7 @@ const ProductErrorState = () => {
         Something Went Wrong
       </span>
 
-      <h2 className="font-display text-3xl font-bold text-[#0B0B0B]">
+      <h2 className="font-display text-3xl font-bold text-near-black">
         Unable to Load Products
       </h2>
 
@@ -26,7 +26,7 @@ const ProductErrorState = () => {
 
       <button
         onClick={() => window.location.reload()}
-        className="mt-8 rounded-xl bg-[#0B0B0B] px-8 py-3 text-xs font-bold uppercase tracking-[0.15em] text-[#FAD90C] transition hover:opacity-90"
+        className="mt-8 rounded-xl bg-near-black px-8 py-3 text-xs font-bold uppercase tracking-[0.15em]  text-gold transition hover:opacity-90"
       >
         Try Again
       </button>

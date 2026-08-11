@@ -3,7 +3,7 @@ import Container from "@/components/ui/shared/Container";
 
 const QuotePageSkeleton = () => {
   return (
-    <div className="bg-[#F8F6F2] px-5 py-10 lg:px-10">
+    <div className="bg-off-white px-5 py-10 lg:px-10">
       <div className="flex justify-between gap-10">
         {/* Left */}
         <div className="flex w-full flex-col gap-4 lg:w-[65%]">
@@ -17,7 +17,7 @@ const QuotePageSkeleton = () => {
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}
-              className="overflow-hidden rounded-2xl border border-[#EAE6DD] bg-white"
+              className="overflow-hidden rounded-2xl border border-border bg-white"
             >
               <div className="flex">
                 {/* Image */}
@@ -56,7 +56,7 @@ const QuotePageSkeleton = () => {
           ))}
 
           {/* Notes */}
-          <div className="rounded-2xl border border-[#EAE6DD] bg-white p-7">
+          <div className="rounded-2xl border border-border bg-white p-7">
             <Skeleton className="mb-4 h-4 w-32 bg-zinc-300" />
             <Skeleton className="h-28 w-full rounded-lg bg-zinc-300" />
             <Skeleton className="mt-4 h-10 w-28 rounded bg-zinc-300" />
@@ -65,7 +65,7 @@ const QuotePageSkeleton = () => {
 
         {/* Summary */}
         <div className="hidden w-[30%] lg:block">
-          <div className="rounded-2xl border border-[#EAE6DD] bg-white p-7">
+          <div className="rounded-2xl border border-border bg-white p-7">
             <Skeleton className="h-6 w-40 bg-zinc-300" />
 
             <div className="mt-6 space-y-4">

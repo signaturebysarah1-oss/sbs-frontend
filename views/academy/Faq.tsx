@@ -87,7 +87,7 @@ const benefits = [
 
 const FAQSection = () => {
   return (
-    <section className="bg-[#F8F6F2] py-24">
+    <section className="bg-off-white py-24">
       <Container>
         {/* HEADER */}
 
@@ -105,7 +105,7 @@ const FAQSection = () => {
 
         <div className="rounded-[35px] bg-[#111] p-10 lg:p-14">
           <div className="mb-10">
-            <p className="text-xs uppercase tracking-[0.3em] text-[#FAD90C]">
+            <p className="text-xs uppercase tracking-[0.3em]  text-gold">
               Training Format
             </p>
 
@@ -123,7 +123,7 @@ const FAQSection = () => {
                   key={item.title}
                   className="rounded-2xl border border-white/10 bg-white/5 p-6"
                 >
-                  <Icon className="mb-5 h-8 w-8 text-[#FAD90C]" />
+                  <Icon className="mb-5 h-8 w-8  text-gold" />
 
                   <h4 className="font-semibold text-white">{item.title}</h4>
 
@@ -192,12 +192,12 @@ const FAQSection = () => {
     Frequently Asked
   </h2>
 
-  <div className="mx-auto mt-8 h-[3px] w-20 bg-[#C9A227]" />
+  <div className="mx-auto mt-8 h-0.75 w-20 bg-[#C9A227]" />
 </div>
 
 
 {/* Accordion */}
-<div className="border-y border-[#EAE6DD]">
+<div className="border-y border-border">
 
   <Accordion >
 
@@ -205,7 +205,7 @@ const FAQSection = () => {
       <AccordionItem
         key={faq.q}
         value={`faq-${index}`}
-        className="border-[#EAE6DD]"
+        className="border-border"
       >
 
         <AccordionTrigger className="py-6 text-left font-display text-lg font-semibold text-[#111] hover:no-underline [&>svg]:text-[#C9A227]">
@@ -227,8 +227,8 @@ const FAQSection = () => {
 
 </div>
 
-        <div className="mt-28 rounded-[32px] border border-[#FAD90C]/20 bg-gradient-to-r from-[#151515] via-[#181818] to-[#151515] px-8 py-14 text-center">
-          <p className="mb-3 text-sm uppercase tracking-[0.35em] text-[#FAD90C]">
+        {/* <div className="mt-28 rounded-[32px] border border-gold/20 bg-linear-to-r from-[#151515] via-[#181818] to-[#151515] px-8 py-14 text-center">
+          <p className="mb-3 text-sm uppercase tracking-[0.35em]  text-gold">
             Not Sure Where To Begin?
           </p>
 
@@ -242,10 +242,10 @@ const FAQSection = () => {
             matches your experience and goals.
           </p>
 
-          <button className="mt-10 rounded-xl bg-[#FAD90C] px-8 py-4 text-sm font-bold uppercase tracking-[0.25em] text-black transition hover:scale-105">
+          <button className="mt-10 rounded-xl bg-gold px-8 py-4 text-sm font-bold uppercase tracking-[0.25em] text-black transition hover:scale-105">
             Enrol Now
           </button>
-        </div>
+        </div> */}
       </Container>
     </section>
   );

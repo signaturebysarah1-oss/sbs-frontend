@@ -3,13 +3,13 @@ import Image from "next/image";
 export default function PageLoader() {
   return (
     <div
-      className="sbs-loader fixed inset-0 z-[9999] flex min-h-screen items-center justify-center overflow-hidden bg-[#0B0B0B]"
+      className="sbs-loader fixed inset-0 z-[9999] flex min-h-screen items-center justify-center overflow-hidden bg-near-black"
       role="status"
       aria-live="polite"
       aria-label="Loading Signature by Sarah"
     >
       {/* subtle gold glow */}
-      <div className="absolute h-[500px] w-[500px] rounded-full bg-[#FAD90C]/5 blur-[120px]" />
+      <div className="absolute h-[500px] w-[500px] rounded-full bg-gold/5 blur-[120px]" />
 
       <div className="relative flex flex-col items-center text-center">
         <div className="sbs-logo mb-8">
@@ -23,16 +23,16 @@ export default function PageLoader() {
           />
         </div>
 
-        <h1 className="sbs-title font-display text-3xl font-bold tracking-[-0.03em] text-[#F8F6F2] sm:text-5xl">
+        <h1 className="sbs-title font-display text-3xl font-bold tracking-[-0.03em] text-off-white sm:text-5xl">
           Signature by Sarah
         </h1>
 
-        <p className="sbs-subtitle mt-4 text-[10px] uppercase tracking-[0.35em] text-[#FAD90C]">
+        <p className="sbs-subtitle mt-4 text-[10px] uppercase tracking-[0.35em]  text-gold">
           Handcrafted Leather Footwear
         </p>
 
         <div className="mt-10 h-px w-40 overflow-hidden bg-white/10">
-          <span className="block h-full bg-[#FAD90C]" />
+          <span className="block h-full bg-gold" />
         </div>
       </div>
 

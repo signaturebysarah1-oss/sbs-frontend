@@ -1,4 +1,5 @@
 import About from "./About"
+import AcademyRegistration from "./Contact"
 import Courses from "./Courses"
 import FAQSection from "./Faq"
 import Hero from "./Hero"
@@ -10,10 +11,11 @@ const AcademyPage = () => {
     <div>
         <Hero/>
         <About/>
-        <WhyLearn/>
         <Courses/>
+        <WhyLearn/>
         <Admissions/>
         <FAQSection/>
+        <AcademyRegistration/>
     </div>
   )
 }

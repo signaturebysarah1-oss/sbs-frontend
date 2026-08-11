@@ -56,6 +56,7 @@ export interface ProductVariant {
 
 export interface Collection {
   id?: string;
+  images?:string[];
   name: string;
   slug: string;
   description: string;
@@ -158,6 +159,9 @@ export interface CustomMeasurements {
 
 export interface QuoteItem {
   productId: string;
+  id:string;
+  selectedColor?:string;
+  selectedMaterial?:string
   productNameSnapshot: string;
   customerNotes?: string;
 
@@ -199,7 +203,7 @@ export interface CreateQuotePayload {
   guestName?: string;
   guestEmail?: string;
   guestPhone?: string;
-
+customerStatus?: "pending" | "completed";
   customerNotes?: string;
 
   items: QuoteItemPayload[];
@@ -236,3 +240,158 @@ export type QuoteDraft = {
     }
   ];
 };
+
+export type ContactMethod = "email" | "whatsapp";
+
+export interface CreateCartPayload {
+  productId?: string | null;
+  productNameSnapshot?: string | null;
+  imageUrlSnapshot?: string | null;
+  quantity: number;
+  selectedSize?: number | null;
+  selectedColor?: string | null;
+  selectedMaterial?: string | null;
+  unitPriceSnapshot: number;
+}
+
+export interface UpdateCartPayload {
+  quantity?: number;
+  selectedSize?: number | null;
+  selectedColor?: string | null;
+  selectedMaterial?: string | null;
+}
+
+export interface SubmitCartPayload {
+  contactMethod: ContactMethod;
+  phoneNumber?: string;
+}
+export interface CartItemPayload {
+  productId?: string | null;
+  productNameSnapshot: string;
+  imageUrlSnapshot: string;
+  quantity: number;
+  variantId?: string,
+
+  selectedSize?: number | null;
+  selectedColor?: string | null;
+  selectedMaterial?: string | null;
+  unitPriceSnapshot: number;
+}
+
+
+
+export interface UpdateCartItemPayload {
+  quantity?: number;
+  selectedSize?: number | null;
+  selectedColor?: string | null;
+  selectedMaterial?: string | null;
+}
+
+
+export interface CartItem {
+  id: string;
+  productId: string | null;
+  productNameSnapshot: string;
+  imageUrlSnapshot: string;
+  quantity: number;
+  selectedSize: number | null;
+  selectedColor: string | null;
+  selectedMaterial: string | null;
+  unitPriceSnapshot: number;
+}
+
+
+export interface Cart {
+  id: string;
+  profileId: string;
+  status: "active" | "submitted" | "abandoned";
+  items: CartItem[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+
+
+export interface TrackingItem {
+  productId?: string | null;
+  productNameSnapshot?: string | null;
+  imageUrlSnapshot?: string | null;
+  quantity: number;
+  selectedSize?: number | string | null;
+  selectedColor?: string | null;
+  selectedMaterial?: string | null;
+  unitPriceSnapshot: number;
+}
+
+export interface StatusHistory {
+  id?:string
+  status: string;
+  note?: string | null;
+  createdAt: string;
+}
+
+export interface TrackingOrder {
+  orderNumber: string;
+  orderType?: string;
+  status: string;
+  items: TrackingItem[];
+  total?: number;
+  totalSnapshot?: number;
+  paymentUrl?: string | null;
+  receiptUrl?: string | null;
+  receiptPublicId?: string | null;
+  shippingTrackingNumber?: string | null;
+  shippingTrackingUrl?: string | null;
+  shippingDetails?: {
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    [key: string]: unknown;
+  } | null;
+  createdAt: string;
+  completedAt?: string | null;
+  statusHistory?: StatusHistory[];
+}
+
+interface OrderItem {
+  productId?: string | null;
+  productNameSnapshot?: string | null;
+  imageUrlSnapshot?: string | null;
+  quantity: number;
+  selectedSize?: number | string | null;
+  selectedColor?: string | null;
+  selectedMaterial?: string | null;
+  unitPriceSnapshot: number;
+}
+
+
+export interface Order {
+  id: string;
+  originalCartId?: string;
+  orderNumber?: string;
+  profileId?: string;
+
+  items: OrderItem[];
+  totalSnapshot: number;
+
+  status: string;
+  completedAt?: string | null;
+  createdAt: string;
+
+  paymentUrl?: string | null;
+  receiptUrl?: string | null;
+  receiptPublicId?: string | null;
+
+  shippingTrackingNumber?: string | null;
+  shippingTrackingUrl?: string | null;
+  shippingDetails?: {
+    address?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    [key: string]: unknown;
+  } | null;
+
+  statusHistory?: StatusHistory[];
+}

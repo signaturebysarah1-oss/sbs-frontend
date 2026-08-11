@@ -1,81 +1,16 @@
-// "use client";
-
-// import { useEffect } from "react";
-// import { useRouter } from "next/navigation";
-// import { useMutation } from "@tanstack/react-query";
-
-// import { supabase } from "@/lib/supabase";
-// import { createQuote } from "@/providers/quoteMutation";
-
-// export default function Callback() {
-//   const router = useRouter();
-
-//   const { mutate } = useMutation({
-//     mutationFn: createQuote,
-//   });
-
-//   useEffect(() => {
-//     const handleAuth = async () => {
-//       const {
-//         data: { session },
-//       } = await supabase.auth.getSession();
-
-//       if (!session) {
-//         router.replace("/");
-//         return;
-//       }
-
-//       const redirectPath =
-//         localStorage.getItem("auth_redirect") || "/";
-
-//       const pendingQuote =
-//         localStorage.getItem("sbs-quote");
-
-//       if (pendingQuote) {
-//         mutate(
-//           {
-//             items: JSON.parse(pendingQuote),
-//           },
-//           {
-//             onSuccess: () => {
-//               localStorage.removeItem("sbs-quote");
-//               localStorage.removeItem("auth_redirect");
-
-//               router.replace(redirectPath);
-//             },
-
-//             onError: () => {
-//               // Keep the quote so the user can retry.
-//               router.replace(redirectPath);
-//             },
-//           }
-//         );
-
-//         return;
-//       }
-
-//       localStorage.removeItem("auth_redirect");
-//       router.replace(redirectPath);
-//     };
-
-//     handleAuth();
-//   }, [mutate, router]);
-
-//   return (
-//     <p className="flex min-h-screen items-center justify-center">
-//       Signing you in...
-//     </p>
-//   );
-// }
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { getGuestCart, clearGuestCart } from "@/services/guest-cart";
+import { useCreateCartMutation } from "@/providers/mutations/carts";
 
 export default function Callback() {
   const router = useRouter();
+  const { mutateAsync: createCart } = useCreateCartMutation();
+  const [isMerging, setIsMerging] = useState(false);
 
   useEffect(() => {
     const handleAuth = async () => {
@@ -88,20 +23,45 @@ export default function Callback() {
         return;
       }
 
-      let redirectPath =
-      localStorage.getItem("auth_redirect") || "/";
-    
-    const currentStep = localStorage.getItem("custom_step");
-    
-    if (redirectPath === "/custom" ) {
-      redirectPath = `/custom?step=7`;
-    }
-    
-    router.replace(redirectPath);
-    
-    toast.success("User logged in successfully");
-      router.replace(redirectPath);
+      const guestItems = getGuestCart();
 
+      if (guestItems.length > 0) {
+        setIsMerging(true);
+
+        try {
+          await Promise.all(
+            guestItems.map((item) =>
+              createCart({
+                productId: item.productId,
+                productNameSnapshot: item.productNameSnapshot,
+                imageUrlSnapshot: item.imageUrlSnapshot,
+                quantity: item.quantity,
+                selectedSize: item.selectedSize,
+                selectedColor: item.selectedColor,
+                selectedMaterial: item.selectedMaterial,
+                unitPriceSnapshot: item.unitPriceSnapshot,
+              })
+            )
+          );
+
+          clearGuestCart();
+        } catch (error) {
+          console.error(error);
+          toast.error("Some saved items couldn't be added to your cart");
+          // Guest items stay in localStorage so nothing's lost — they'll
+          // be retried on the next successful merge attempt.
+        } finally {
+          setIsMerging(false);
+        }
+      }
+
+      let redirectPath = localStorage.getItem("auth_redirect") || "/";
+
+      if (redirectPath === "/custom") {
+        redirectPath = `/custom?step=7`;
+      }
+
+      router.replace(redirectPath);
       toast.success("User logged in successfully");
     };
 
@@ -110,7 +70,7 @@ export default function Callback() {
 
   return (
     <p className="flex min-h-screen items-center justify-center">
-      Signing you in...
+      {isMerging ? "Syncing your saved items..." : "Signing you in..."}
     </p>
   );
 }

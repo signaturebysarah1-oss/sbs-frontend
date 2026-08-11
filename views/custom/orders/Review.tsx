@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useCreateQuote } from "@/hooks/useCreateQuotes";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 interface ExtraMeasurement {
   label: string;
@@ -108,9 +109,12 @@ const Review = ({ selections }: ReviewProps) => {
       onSuccess: () => {
         localStorage.removeItem("sbs-custom-order");
         setShowSuccess(true);
-        router.push("/custom");
+      
+        setTimeout(() => {
+          router.push("/custom?step=1");
+          toast.success("Quote submitted successfully");
+        }, 3000);
       },
-
       onError: (error) => {
         console.error("Quote failed", error);
       },
@@ -125,11 +129,12 @@ const Review = ({ selections }: ReviewProps) => {
     createQuote(payload, {
       onSuccess: () => {
         localStorage.removeItem("sbs-custom-order");
-
-        setShowGuestForm(false);
-        router.push("/custom");
-
         setShowSuccess(true);
+      
+        setTimeout(() => {
+          router.push("/custom?step=1");
+          toast.success("Quote submitted successfully");
+        }, 3000);
       },
 
       onError: (error) => {
@@ -178,7 +183,7 @@ const Review = ({ selections }: ReviewProps) => {
 
   return (
     <div>
-      <h2 className="mb-2 font-display text-4xl font-bold text-[#0B0B0B]">
+      <h2 className="mb-2 font-display text-4xl font-bold text-near-black">
         Review Your Order
       </h2>
 
@@ -187,8 +192,8 @@ const Review = ({ selections }: ReviewProps) => {
       </p>
 
       <div className="grid items-start gap-10 lg:grid-cols-2">
-        <div className="rounded-[20px] bg-[#0B0B0B] p-9">
-          <h3 className="mb-7 font-display text-xl font-semibold text-[#F8F6F2]">
+        <div className="rounded-[20px] bg-near-black p-9">
+          <h3 className="mb-7 font-display text-xl font-semibold text-off-white">
             Order Summary
           </h3>
 
@@ -211,14 +216,14 @@ const Review = ({ selections }: ReviewProps) => {
                 {item.label}
               </span>
 
-              <span className="text-sm font-semibold capitalize text-[#FAD90C]">
+              <span className="text-sm font-semibold capitalize  text-gold">
                 {item.value || "—"}
               </span>
             </div>
           ))}
 
-          <div className="mt-8 rounded-xl border border-[#FAD90C]/20 bg-[#FAD90C]/10 p-5">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#FAD90C]">
+          <div className="mt-8 rounded-xl border border-gold/20 bg-gold/10 p-5">
+            <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em]  text-gold">
               Timeline
             </p>
 
@@ -235,12 +240,12 @@ const Review = ({ selections }: ReviewProps) => {
         {/* Right */}
 
         <div>
-          <div className="mb-5 rounded-[20px] border-2 border-[#EAE6DD] bg-[#F8F6F2] p-9">
+          <div className="mb-5 rounded-[20px] border-2 border-border bg-off-white p-9">
             <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#888]">
               Estimated Starting Price
             </p>
 
-            <h2 className="font-display text-5xl font-bold tracking-tight text-[#0B0B0B]">
+            <h2 className="font-display text-5xl font-bold tracking-tight text-near-black">
               ₦{displayPrice.toLocaleString()}
               <span className="text-xl text-[#888]">+</span>
             </h2>
@@ -254,7 +259,7 @@ const Review = ({ selections }: ReviewProps) => {
             <button
               onClick={requestQuote}
               disabled={isPending}
-              className="mt-4 flex w-full items-center justify-center rounded-xl bg-[#FAD90C] py-4 text-sm font-semibold uppercase tracking-wider text-[#0B0B0B]"
+              className="mt-4 flex w-full items-center justify-center rounded-xl bg-gold py-4 text-sm font-semibold uppercase tracking-wider text-near-black"
             >
               {isPending ? (
                 <Loader2 className="animate-spin" />
@@ -267,9 +272,9 @@ const Review = ({ selections }: ReviewProps) => {
           {showGuestForm && (
             <form
               onSubmit={submitGuestQuote}
-              className="mt-4 flex flex-col gap-4 rounded-2xl border border-[#EAE6DD] bg-white p-7"
+              className="mt-4 flex flex-col gap-4 rounded-2xl border border-border bg-white p-7"
             >
-              <div className="text-xs font-bold uppercase tracking-[0.14em] text-[#0B0B0B]">
+              <div className="text-xs font-bold uppercase tracking-[0.14em] text-near-black">
                 Your Details
               </div>
 
@@ -283,7 +288,7 @@ const Review = ({ selections }: ReviewProps) => {
                     name: e.target.value,
                   })
                 }
-                className="rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] px-4 py-3 text-sm outline-none"
+                className="rounded-lg border border-border bg-off-white px-4 py-3 text-sm outline-none"
               />
 
               <input
@@ -297,7 +302,7 @@ const Review = ({ selections }: ReviewProps) => {
                     email: e.target.value,
                   })
                 }
-                className="rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] px-4 py-3 text-sm outline-none"
+                className="rounded-lg border border-border bg-off-white px-4 py-3 text-sm outline-none"
               />
 
               <input
@@ -309,12 +314,12 @@ const Review = ({ selections }: ReviewProps) => {
                     phone: e.target.value,
                   })
                 }
-                className="rounded-lg border border-[#EAE6DD] bg-[#F8F6F2] px-4 py-3 text-sm outline-none"
+                className="rounded-lg border border-border bg-off-white px-4 py-3 text-sm outline-none"
               />
 
               <button
                 disabled={isPending}
-                className="rounded-lg bg-[#0B0B0B] py-4 text-xs font-bold uppercase tracking-wider text-[#FAD90C]"
+                className="rounded-lg bg-near-black py-4 text-xs font-bold uppercase tracking-wider  text-gold"
               >
                 {isPending ? "Submitting..." : "Submit Quote Request"}
               </button>

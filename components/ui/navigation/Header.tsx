@@ -8,17 +8,18 @@ import {
   ShoppingBagIcon,
   HistoryIcon,
   CircleUserRound,
+  LogOut,
+  Loader2,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Container from "../shared/Container";
 import Link from "next/link";
-import LogoutButton from "./logout";
 import { useQuery } from "@tanstack/react-query";
-import { getPendingQuote } from "@/providers/quoteQuery";
 import { supabase } from "@/lib/supabase";
-import { Session } from "@supabase/supabase-js";
+import { useSession } from "@/providers/AuthProvider";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,14 +27,15 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-const QUOTE_KEY = "sbs-quote";
+import { toast } from "sonner";
+import { authQuery } from "@/providers/query";
+import CartSidebar from "../modals/CartSidebar";
 
 const readGuestItemCount = (): number => {
   try {
-    const stored = localStorage.getItem(QUOTE_KEY);
+    const stored = localStorage.getItem("guest-cart");
     if (!stored) return 0;
     const parsed = JSON.parse(stored);
     return Array.isArray(parsed) ? parsed.length : 0;
@@ -41,37 +43,35 @@ const readGuestItemCount = (): number => {
     return 0;
   }
 };
+
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [session, setSession] = useState<Session | null>();
   const [guestCartCount, setGuestCartCount] = useState(0);
-
+  const { session } = useSession();
+  const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
-
     window.addEventListener("scroll", handleScroll, { passive: true });
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+  const { data: cartData, isLoading } = useQuery({
+    queryKey: ["my-quotes"],
+    queryFn: () => authQuery("/api/cart"),
+    enabled: !!session,
+    staleTime: 60 * 1000,
+  });
 
-      setSession(session);
-    };
-
-    checkSession();
-  }, []);
+  const cartCount = session
+    ? cartData?.data?.items?.length ?? 0
+    : guestCartCount;
 
   // Guest cart count: read on mount, and refresh whenever it changes —
   // either from another tab (native "storage" event) or the same tab
-  // (custom "sbs-quote-updated" event dispatched from cart.ts).
+  // (custom "guest-quote-updated" event dispatched from guest-cart.ts).
   useEffect(() => {
     if (session) return;
 
@@ -80,21 +80,33 @@ const Header = () => {
     refreshGuestCount();
 
     window.addEventListener("storage", refreshGuestCount);
-    window.addEventListener("sbs-quote-updated", refreshGuestCount);
+    window.addEventListener("guest-cart-updated", refreshGuestCount);
 
     return () => {
       window.removeEventListener("storage", refreshGuestCount);
-      window.removeEventListener("sbs-quote-updated", refreshGuestCount);
+      window.removeEventListener("guest-cart-updated", refreshGuestCount);
     };
   }, [session]);
 
-  const { data: pendingQuote } = useQuery({
-    queryKey: ["pending-quote", session?.user.id],
-    queryFn: getPendingQuote,
-    enabled: !!session,
-  });
+  const handleLogout = async () => {
+    const logoutPromise = async () => {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw new Error("Failed to logout");
+      }
+    };
 
-  const cartCount = session ? pendingQuote?.items?.length ?? 0 : guestCartCount;
+    toast.promise(logoutPromise(), {
+      loading: "Logging out...",
+      success: () => {
+        router.push("/");
+        router.refresh();
+        return "Logged out successfully";
+      },
+      error: "Failed to logout",
+    });
+  };
+
   const loginWithGoogle = async () => {
     localStorage.setItem(
       "auth_redirect",
@@ -108,6 +120,7 @@ const Header = () => {
       },
     });
   };
+
   const navLinks = [
     { label: "Home", href: "/" },
     { label: "Shop", href: "/product" },
@@ -122,11 +135,11 @@ const Header = () => {
       <nav
         className={`
           fixed top-0 left-0 right-0 z-50
-          bg-[#0B0B0B]
+          bg-near-black
           transition-all duration-300
           ${
             scrolled
-              ? "border-b border-[#FAD90C]/15 shadow-[0_2px_30px_rgba(0,0,0,0.4)]"
+              ? "border-b border-gold/15 shadow-[0_2px_30px_rgba(0,0,0,0.4)]"
               : "border-b border-transparent"
           }
         `}
@@ -134,26 +147,26 @@ const Header = () => {
         <Container>
           <div className=" h-18 flex items-center justify-between">
             <button className="flex items-center gap-3">
-              <Image
-                src="/sarah-logo.jpg"
-                alt="SBS Logo"
-                width={42}
-                height={42}
-                className="rounded"
-              />
+              <Link href={"/"}>
+                <Image
+                  src="/sarah-logo.jpg"
+                  alt="SBS Logo"
+                  width={42}
+                  height={42}
+                  className="rounded cursor-pointer"
+                />
+              </Link>
               <div className="flex flex-col leading-none">
                 <span className="text-gold text-[13px] font-bold tracking-[0.06em]">
                   SIGNATURE
                 </span>
-
                 <span className="text-white/55 text-[9px] font-normal tracking-[0.2em] uppercase">
                   by sarah
                 </span>
               </div>
             </button>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-9">
+            <div className="hidden lg:flex items-center gap-9">
               {navLinks.map(({ label, href }) => {
                 const active =
                   pathname === href ||
@@ -178,20 +191,19 @@ const Header = () => {
               })}
             </div>
 
-            {/* Icons */}
             <div className="flex items-center gap-5">
-              <button className="hidden md:block text-white/70 hover:text-gold transition">
+              <button className="hidden lg:block text-white/70 hover:text-gold transition">
                 <SearchIcon size={20} />
               </button>
 
-              <button className="hidden md:block text-white/70 hover:text-gold transition">
+              <button className="hidden lg:block text-white/70 hover:text-gold transition">
                 <HeartIcon size={20} />
               </button>
-              <Link className="cursor-pointer" href="/cart">
-                <span className="relative  text-white/70 hover:text-gold transition">
-                  <ShoppingBagIcon size={20} />
 
-                  {cartCount > 0 && (
+                <span className="relative  text-white/70 hover:text-gold transition">
+                  <CartSidebar/>
+
+                  {/* {cartCount > 0 && (
                     <span
                       className="
                     absolute -top-2 -right-2
@@ -204,69 +216,78 @@ const Header = () => {
                     flex items-center justify-center
                   "
                     >
-                      {cartCount}
+                      {isLoading ? (
+                        <Loader2 className="animate-spin" />
+                      ) : (
+                        cartCount
+                      )}
                     </span>
-                  )}
+                  )} */}
                 </span>
-              </Link>
+
               <button
                 onClick={() => setMobileOpen(true)}
-                className="md:hidden text-white/80"
+                className="lg:hidden text-white/80"
               >
                 <MenuIcon size={24} />
               </button>
 
               <DropdownMenu>
-  <DropdownMenuTrigger
-    className="bg-transparent px-0 hover:bg-transparent cursor-pointer border-none"
-    render={<Button variant="outline" />}
-  >
-    <CircleUserRound className="text-white" size={40} />
-  </DropdownMenuTrigger>
+                <DropdownMenuTrigger
+                  className="bg-transparent px-0 hover:bg-transparent cursor-pointer border-none"
+                  render={<Button variant="outline" />}
+                >
+                  <CircleUserRound className="text-white" size={40} />
+                </DropdownMenuTrigger>
 
-  <DropdownMenuContent className="w-50">
-    <DropdownMenuGroup>
-      <DropdownMenuLabel>My Account</DropdownMenuLabel>
-      {/* <DropdownMenuItem>History</DropdownMenuItem> */}
-    </DropdownMenuGroup>
+                <DropdownMenuContent className="w-50">
+                  <DropdownMenuGroup>
+                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  </DropdownMenuGroup>
 
-    <DropdownMenuGroup>
-      <DropdownMenuItem>
-        <Link
-          href="history"
-          className="flex items-center gap-2 text-black hover:text-gold transition"
-        >
-          <HistoryIcon className="text-black" size={16} />
-          History
-        </Link>
-      </DropdownMenuItem>
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem>
+                      <Link
+                        href="history"
+                        className="flex items-center gap-2 text-black hover:text-gold transition"
+                      >
+                        <HistoryIcon className="text-black" size={16} />
+                        History
+                      </Link>
+                    </DropdownMenuItem>
 
-      <DropdownMenuItem>
-        {session ? (
-          <LogoutButton />
-        ) : (
-          <button
-            onClick={loginWithGoogle}
-            className="w-full cursor-pointer flex items-center gap-2 rounded-xl text-[10px] font-semibold uppercase tracking-wider text-black"
-          >
-            <img src="/googles.png" className="w-4" /> Login with Google
-          </button>
-        )}
-      </DropdownMenuItem>
-    </DropdownMenuGroup>
-  </DropdownMenuContent>
-</DropdownMenu>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      {session ? (
+                        <button
+                          onClick={handleLogout}
+                          className="flex items-center gap-1 rounded-lg text-sm font-semibold text-[#0B0B0B] transition "
+                        >
+                          Logout
+                          <LogOut className="h-[0.5px] w-[0.5px]" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={loginWithGoogle}
+                          className="w-full cursor-pointer flex items-center gap-2 rounded-xl text-[10px] font-semibold uppercase tracking-wider text-black"
+                        >
+                          <img src="/googles.png" className="w-4" /> Login with
+                          Google
+                        </button>
+                      )}
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </Container>
       </nav>
 
-      {/* Mobile Menu */}
       {mobileOpen && (
         <div
           className="
           fixed inset-0 z-100
-          bg-[#0B0B0B]
+          bg-near-black
           px-8 py-6
           flex flex-col
         "
@@ -309,7 +330,6 @@ const Header = () => {
             <a className="text-white/50 text-xs uppercase tracking-widest">
               Instagram
             </a>
-
             <a className="text-white/50 text-xs uppercase tracking-widest">
               WhatsApp
             </a>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -9,16 +8,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CreateQuotePayload, Product } from "@/types/website";
+import { CartItemPayload, Product, QuoteItem } from "@/types/website";
 import { useEffect, useState } from "react";
-import { addToQuote } from "@/services/cart";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { postData } from "@/providers/mutations/Index";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { authFetchs } from "@/lib/api";
 import { supabase } from "@/lib/supabase";
 import { Session } from "@supabase/supabase-js";
+import { useCreateCartMutation } from "@/providers/mutations/carts";
+import { addGuestCartItem } from "@/services/guest-items";
 
 interface ViewModalProps {
   products: Product;
@@ -26,50 +23,14 @@ interface ViewModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
-interface QuoteItem {
-  productId: string;
-  productNameSnapshot: string;
-  quantity: number;
-  unitPriceSnapshot: number;
-  variantLabelSnapshot?: string;
-  materialNameSnapshot?: string;
-  colorNameSnapshot?: string;
-  customNotes?: string;
-}
-
-interface Quote {
-  id: string;
-  referenceNumber: string;
-  profileId: string;
-  customerNotes: string;
-  customerStatus: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-  submittedAt: string;
-  reviewedAt: string | null;
-  completedAt: string | null;
-  items: QuoteItem[];
-}
-
-interface QuotesResponse {
-  success: boolean;
-  message: string;
-  data: Quote[];
-}
-
 const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
-  const queryClient = useQueryClient();
+  const [selectedColor, setSelectedColor] = useState<number | null>(null);
+  const [session, setSession] = useState<Session | null>();
 
-  const [selectedColor, setSelectedColor] = useState(0);
   const [selectedImage, setSelectedImage] = useState(
     products.images.find((img) => img.isPrimary)?.imageUrl ??
       products.images[0]?.imageUrl
   );
-  const [selectedSize, setSelectedSize] = useState<number | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [session, setSession] = useState<Session | null>();
-
   useEffect(() => {
     const checkSession = async () => {
       const {
@@ -82,153 +43,94 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
     checkSession();
   }, []);
 
-  const handleAddToQuote = () => {
-    addToQuote({
-      productId: products.id,
-      productNameSnapshot: products.name || "",
-      quantity: 1,
-      imageUrlSnapshot: products.images[0].imageUrl || "",
-      unitPriceSnapshot: products.basePrice,
-      variantLabelSnapshot: selectedSize ? `EU ${selectedSize}` : undefined,
-      materialNameSnapshot: products.materials[0]?.name,
-      colorNameSnapshot: products.colors[selectedColor]?.name,
-      customNotes: "",
-    });
-  
-    // toast.success("Added to quote") already fires inside addToQuote — don't duplicate it here
+  const [selectedSize, setSelectedSize] = useState<number | null>(null);
+
+  const validateSelection = () => {
+    if (selectedColor === null) {
+      toast.error("Please select a color");
+      return false;
+    }
+
+    if (selectedSize === null) {
+      toast.error("Please select a size");
+      return false;
+    }
+
+    return true;
+  };
+
+  const { mutate: createCart, isPending } = useCreateCartMutation();
+
+  const getCartPayload = (): CartItemPayload => ({
+    productId: products.id,
+    productNameSnapshot: products.name,
+    imageUrlSnapshot: selectedImage ?? "",
+    quantity: 1,
+    selectedSize,
+    selectedColor:
+      selectedColor !== null ? products.colors[selectedColor]?.name : null,
+    selectedMaterial: products.materials[0]?.name ?? null,
+    unitPriceSnapshot: products.basePrice,
+  });
+
+  const handleGuestCart = () => {
+    const payload = getCartPayload();
+
+    addGuestCartItem(payload as QuoteItem);
+
+    toast.success("Added to cart");
     onOpenChange(false);
   };
-  const { mutate: createQuote, isPending } = useMutation({
-    mutationFn: (payload: CreateQuotePayload) => postData("api/quotes", payload),
 
-    onSuccess: () => {
-      toast.success("Added to quote");
-      queryClient.invalidateQueries({ queryKey: ["all-quotes"] });
-    },
-    onError: (error) => {
-      console.error(error);
-      toast.error("Couldn't add to quote. Please try again.");
-    },
-  });
+  // const handleGuestCart = () => {
+  //   const payload = getCartPayload();
 
-  const { mutate: updateQuote, isPending: isUpdatingQuote } = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: CreateQuotePayload }) =>
-      authFetchs(`/api/quotes/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(payload),
-      }),
+  //   const existingCart = JSON.parse(
+  //     localStorage.getItem("guest-cart") || "[]"
+  //   );
 
-    onSuccess: () => {
-      toast.success("Added to quote");
-      queryClient.invalidateQueries({ queryKey: ["all-quotes"] });
-      onOpenChange(false);
-    },
+  //   localStorage.setItem(
+  //     "guest-cart",
+  //     JSON.stringify([...existingCart, payload])
+  //   );
 
-    onError: (error) => {
-      console.error(error);
-      toast.error("Couldn't add to quote. Please try again.");
-    },
-  });
+  //   toast.success("Added to cart");
+  //   onOpenChange(false);
+  // };
+  const handleCartAction = () => {
+    if (!validateSelection()) return;
 
-  // Only fetch quotes for logged-in users — guests never hit the API
-  const { data: getquotes, isLoading: myLoading } = useQuery<QuotesResponse>({
-    queryKey: ["all-quotes"],
-    queryFn: () => authFetchs<QuotesResponse>("/api/quotes/my"),
-    enabled: !!session,
-  });
+    const payload = getCartPayload();
 
-  const allquotes: Quote[] = getquotes?.data ?? [];
-
-  const quotePayload: CreateQuotePayload = {
-    customerNotes: "",
-    items: [
-      {
-        productId: products.id,
-        productNameSnapshot: products.name || "",
-        quantity: 1,
-        unitPriceSnapshot: products.basePrice,
-        variantLabelSnapshot: selectedSize ? `EU ${selectedSize}` : undefined,
-        materialNameSnapshot: products.materials[0]?.name,
-        colorNameSnapshot: products.colors[selectedColor]?.name,
-        customNotes: "",
-        imageUrlSnapshot: products.images[0].imageUrl || "",
-      },
-    ],
-  };
-
-  const handleQuoteAction = async () => {
-    // Guest path — pure localStorage, no network at all
     if (!session) {
-      handleAddToQuote();
+      handleGuestCart();
       return;
     }
 
-    setIsProcessing(true);
+    createCart(payload, {
+      onSuccess: () => {
+        toast.success("Added to cart");
+        onOpenChange(false);
+      },
 
-    try {
-      const latest = await queryClient.fetchQuery<QuotesResponse>({
-        queryKey: ["all-quotes"],
-        queryFn: () => authFetchs<QuotesResponse>("/api/quotes/my"),
-      });
-
-      const freshQuotes: Quote[] = latest?.data ?? [];
-      const pendingQuoteSummary = freshQuotes.find(
-        (item) => item.customerStatus === "pending"
-      );
-
-      if (pendingQuoteSummary?.id) {
-        // /api/quotes/my may not include items — fetch the full quote to be sure
-        const full = await queryClient.fetchQuery<{
-          success: boolean;
-          message: string;
-          data: Quote;
-        }>({
-          queryKey: ["quote", pendingQuoteSummary.id],
-          queryFn: () => authFetchs(`/api/quotes/${pendingQuoteSummary.id}`),
-        });
-
-        const pendingQuote = full?.data;
-
-        updateQuote({
-          id: pendingQuoteSummary.id,
-          payload: {
-            customerNotes: pendingQuote?.customerNotes || "",
-            items: [...(pendingQuote?.items || []), ...quotePayload.items],
-          },
-        });
-
-        return;
-      }
-
-      createQuote(quotePayload, {
-        onSuccess: () => {
-          onOpenChange(false);
-        },
-        onError: (error) => {
-          console.error(error);
-        },
-      });
-    } finally {
-      setIsProcessing(false);
-    }
+      onError: (error: any) => {
+        console.error(error);
+        toast.error(error?.message || "Couldn't add item to cart");
+      },
+    });
   };
-
-  const isBusy = isProcessing || isPending || isUpdatingQuote;
-  // Loading state only matters for logged-in users; guests never wait on this query
-  const isLoadingQuotes = !!session && myLoading;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="overflow-hidden p-0 lg:max-w-3xl">
+      <DialogContent className="w-full! max-h-150! overflow-auto p-0 lg:max-h-fit! lg:max-w-3xl [&>button]:bg-near-black [&>button]:text-white [&>button]:rounded-full [&>button]:opacity-100 [&>button]:border-0 [&>button]:h-8 [&>button]:w-8 [&>button]:top-4 [&>button]:right-4 [&>button]:hover:bg-black">
         <DialogHeader className="hidden">
           <DialogTitle />
           <DialogDescription />
         </DialogHeader>
-
         <div className="grid lg:grid-cols-2">
           {/* Image */}
-          <div className="flex flex-col gap-4 bg-[#F8F6F2] p-5">
-            <div className="aspect-[3/4] overflow-hidden rounded-lg">
+          <div className="flex flex-col gap-4 bg-off-white p-5">
+            <div className="aspect-3/4 overflow-hidden rounded-lg max-sm:h-60 max-sm:aspect-auto">
               <Image
                 src={selectedImage}
                 alt={products.name}
@@ -237,16 +139,15 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
                 className="h-full w-full object-cover transition-all duration-500"
               />
             </div>
-
             <div className="flex gap-3 overflow-x-auto">
               {products.images.map((image) => (
                 <button
                   key={image.id}
                   onClick={() => setSelectedImage(image.imageUrl)}
-                  className={`relative h-20 w-16 flex-shrink-0 overflow-hidden rounded-md border transition-all ${
+                  className={`relative h-20 w-16 shrink-0 overflow-hidden rounded-md border transition-all ${
                     selectedImage === image.imageUrl
-                      ? "border-[#FAD90C] ring-1 ring-[#FAD90C]"
-                      : "border-[#EAE6DD]"
+                      ? "border-gold ring-1 ring-gold"
+                      : "border-border"
                   }`}
                 >
                   <Image
@@ -263,11 +164,11 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
           {/* Content */}
           <div className="flex flex-col gap-5 p-10">
             <div>
-              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.2em] text-[#FAD90C]">
+              {/* <span className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.2em]  text-gold">
                 {products.collections[0]?.name}
-              </span>
+              </span> */}
 
-              <h2 className="mb-2 font-display text-[28px] font-bold leading-[1.1] tracking-[-0.01em] text-[#0B0B0B]">
+              <h2 className="mb-2 font-display text-2xl lg:text-[28px] font-bold leading-[1.1] tracking-[-0.01em] text-near-black">
                 {products.name}
               </h2>
             </div>
@@ -281,9 +182,9 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
                 Material
               </span>
 
-              <span className="h-1 w-1 rounded-full bg-[#FAD90C]" />
+              <span className="h-1 w-1 rounded-full bg-gold" />
 
-              <span className="text-[13px] font-medium text-[#0B0B0B]">
+              <span className="text-[13px] font-medium text-near-black">
                 {products.materials[0]?.name}
               </span>
             </div>
@@ -292,10 +193,12 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
             {products.colors.length > 0 && (
               <div>
                 <div className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#999]">
-                  Color —
-                  <span className="ml-1 text-[#0B0B0B]">
-                    {products.colors[selectedColor]?.name}
-                  </span>
+                  Color
+                  {selectedColor !== null && (
+                    <span className="ml-1 text-near-black">
+                      — {products.colors[selectedColor]?.name}
+                    </span>
+                  )}
                 </div>
 
                 <div className="flex gap-2">
@@ -306,9 +209,9 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
                       onClick={() => setSelectedColor(index)}
                       className={`h-7 w-7 rounded-full border-2 transition-all ${
                         selectedColor === index
-                          ? "border-[#FAD90C]"
+                          ? "border-gold"
                           : "border-transparent"
-                      } outline outline-1 outline-[#EAE6DD] outline-offset-2`}
+                      }  outline-1 outline-border outline-offset-2`}
                       style={{ backgroundColor: color.hexCode }}
                     />
                   ))}
@@ -319,16 +222,6 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
             {/* Sizes */}
             {products.sizes?.length > 0 && (
               <div>
-                <div className="mb-2.5 flex items-center justify-between">
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#999]">
-                    EU Size
-                  </span>
-
-                  <button className="text-[11px] text-[#FAD90C] underline">
-                    Size Guide
-                  </button>
-                </div>
-
                 <div className="flex flex-wrap gap-1.5">
                   {products.sizes.map((size, idx) => (
                     <button
@@ -336,9 +229,9 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
                       onClick={() => setSelectedSize(size)}
                       className={`flex items-center justify-center rounded-md border-[1.5px] px-3 py-2 text-xs font-semibold transition-all ${
                         selectedSize === size
-                          ? "border-[#0B0B0B] bg-[#0B0B0B] text-[#FAD90C]"
-                          : "border-[#EAE6DD] bg-white text-[#666]"
-                      } hover:border-[#0B0B0B]`}
+                          ? "border-near-black bg-near-black  text-gold"
+                          : "border-border bg-white text-[#666]"
+                      } hover:border-near-black`}
                     >
                       {size}
                     </button>
@@ -347,37 +240,32 @@ const ViewModal = ({ products, open, onOpenChange }: ViewModalProps) => {
               </div>
             )}
 
-            <div className="font-display text-[26px] font-bold tracking-[-0.01em] text-[#0B0B0B]">
+            <div className="font-display text-[26px] font-bold tracking-[-0.01em] text-near-black">
               ₦{products.basePrice.toLocaleString()}
             </div>
 
             <button
-              onClick={handleQuoteAction}
-              disabled={isBusy || isLoadingQuotes}
-              className={`rounded-[10px] flex cursor-pointer items-center justify-center px-4 py-[15px] text-[11px] font-bold uppercase tracking-[0.12em] transition-colors ${
-                isLoadingQuotes || isBusy
+              onClick={handleCartAction}
+              disabled={isPending}
+              className={`rounded-[10px] flex cursor-pointer items-center justify-center px-4 py-3.75 text-[11px] font-bold uppercase tracking-[0.12em] transition-colors ${
+                isPending
                   ? "cursor-not-allowed bg-[#3A3A3A] text-[#D8C76A]"
-                  : "bg-[#0B0B0B] text-[#FAD90C] hover:bg-[#1A1A1A]"
+                  : "bg-near-black  text-gold hover:bg-[#1A1A1A]"
               }`}
             >
-              {isLoadingQuotes ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading Product...
-                </>
-              ) : isBusy ? (
+              {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Adding...
                 </>
               ) : (
-                "Add to Quote"
+                "Add to Bag"
               )}
             </button>
 
             {products.isNewArrival && (
-              <div className="rounded-lg border border-[#FAD90C]/30 bg-[#FAD90C]/10 p-4">
-                <span className="text-[11px] text-[#0B0B0B]">
+              <div className="rounded-lg border border-gold/30 bg-gold/10 p-4">
+                <span className="text-[11px] text-near-black">
                   ✦ <strong>New Arrival</strong> · Recently added to the
                   collection.
                 </span>

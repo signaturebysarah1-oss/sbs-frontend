@@ -12,7 +12,7 @@ const EmptyCartState = () => {
       />
 
       <div>
-        <h2 className="mb-3 text-[32px] font-bold tracking-[-0.01em] text-[#0B0B0B] font-[var(--font-display)]">
+        <h2 className="mb-3 text-[32px] font-bold tracking-[-0.01em] text-near-black font-[var(--font-display)]">
           Your Quote Cart is Empty
         </h2>
 
@@ -22,7 +22,7 @@ const EmptyCartState = () => {
         </p>
       </div>
 
-      <button className="cursor-pointer rounded-[10px] border-none bg-[#0B0B0B] px-10 py-4 text-[11px] font-bold uppercase tracking-[0.14em] text-[#FAD90C] transition-transform duration-200 font-[var(--font-sans)]">
+      <button className="cursor-pointer rounded-[10px] border-none bg-near-black px-10 py-4 text-[11px] font-bold uppercase tracking-[0.14em]  text-gold transition-transform duration-200 font-[var(--font-sans)]">
         Explore the Collection
       </button>
     </div>

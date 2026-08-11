@@ -18,7 +18,7 @@ const EmptyProductsState = () => {
           Signature By Sarah
         </span>
 
-        <h2 className="font-display text-3xl font-bold text-[#0B0B0B]">
+        <h2 className="font-display text-3xl font-bold text-near-black">
           No Products Found
         </h2>
 
@@ -29,7 +29,7 @@ const EmptyProductsState = () => {
 
         <Link
           href="/product"
-          className="mt-8 rounded-xl bg-[#0B0B0B] px-8 py-3 text-xs font-bold uppercase tracking-[0.15em] text-[#FAD90C] transition hover:opacity-90"
+          className="mt-8 rounded-xl bg-near-black px-8 py-3 text-xs font-bold uppercase tracking-[0.15em]  text-gold transition hover:opacity-90"
         >
           View All Products
         </Link>

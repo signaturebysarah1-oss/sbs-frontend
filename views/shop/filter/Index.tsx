@@ -1,16 +1,19 @@
 "use client";
 
-import { getProducts } from "@/providers/get";
-import { Product, QuoteData, QuoteDraft, QuoteItem } from "@/types/website";
+import { getProducts } from "@/providers/query";
+import { Product } from "@/types/website";
 import { useQuery } from "@tanstack/react-query";
 import Products from "./Products";
 import ProductFiltersSidebar from "./Filters";
 import { useSearchParams } from "next/navigation";
-import { authFetch } from "@/providers/get/authfetch";
-import { authFetchs } from "@/lib/api";
 import ProductErrorState from "./ErrorState";
-import EmptyProductsState from "../EmptyState";
-
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { SlidersHorizontal } from "lucide-react";
 
 const Index = () => {
   const searchParams = useSearchParams();
@@ -25,36 +28,58 @@ const Index = () => {
     queryKey: ["products", queryString],
     queryFn: () =>
       getProducts(`api/products${queryString ? `?${queryString}` : ""}`),
-    // staleTime: 1000 * 60 * 5,
   });
-  // All products for filters
+
   const { data: allProductsData } = useQuery({
     queryKey: ["all-products"],
     queryFn: () => getProducts("api/products"),
-    // staleTime: 1000 * 60 * 5,
   });
 
- 
   const products: Product[] = filteredData?.data ?? [];
   const allProducts: Product[] = allProductsData?.data ?? [];
-  console.log(products);
-  console.log(allProducts);
-  // Error
-if (error) {
-  return <ProductErrorState />;
-}
 
-
+  if (error) {
+    return <ProductErrorState />;
+  }
 
   return (
     <section className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
-      <ProductFiltersSidebar
-        products={allProducts}
-        isLoading={isLoading}
-        error={!!error}
-      />
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <ProductFiltersSidebar
+          products={allProducts}
+          isLoading={isLoading}
+          error={!!error}
+        />
+      </div>
 
       <div>
+        <div className="mb-6 flex lg:hidden">
+          <Sheet>
+            <SheetTrigger>
+              <div className="flex items-center gap-2 border border-input mt-2 mx-4 bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 rounded-md text-sm font-medium cursor-pointer">
+                <SlidersHorizontal className="h-4 w-4" />
+                Filters
+              </div>
+            </SheetTrigger>
+
+            <SheetContent
+              side="left"
+              className="w-[320px] border-none overflow-y-auto "
+            >
+              <SheetHeader></SheetHeader>
+
+              <div className="mt-6">
+                <ProductFiltersSidebar
+                  products={allProducts}
+                  isLoading={isLoading}
+                  error={!!error}
+                />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
         <Products
           products={products}
           isLoading={isLoading}

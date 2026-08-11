@@ -54,24 +54,24 @@ const WhyCard = ({ card, featured = false }: any) => {
     <div
       className={`group relative overflow-hidden rounded-3xl border border-white/10 p-8 transition-all duration-500 ${
         featured
-          ? "bg-[#FAD90C] text-[#111]"
-          : "bg-[#151515] text-white hover:-translate-y-2 hover:border-[#FAD90C]/40"
+          ? "bg-gold text-[#111]"
+          : "bg-[#151515] text-white hover:-translate-y-2 hover:border-gold/40"
       }`}
     >
       <div
         className={`absolute right-0 top-0 h-32 w-32 rounded-full blur-3xl ${
-          featured ? "bg-black/10" : "bg-[#FAD90C]/10"
+          featured ? "bg-black/10" : "bg-gold/10"
         }`}
       />
 
       <div
         className={`relative mb-8 flex h-14 w-14 items-center justify-center rounded-2xl ${
-          featured ? "bg-[#111]" : "border border-[#FAD90C]/30 bg-[#FAD90C]/10"
+          featured ? "bg-[#111]" : "border border-gold/30 bg-gold/10"
         }`}
       >
         <Icon
           className={`h-7 w-7 ${
-            featured ? "text-[#FAD90C]" : "text-[#FAD90C]"
+            featured ? " text-gold" : " text-gold"
           }`}
           strokeWidth={1.7}
         />
@@ -98,10 +98,10 @@ const WhyCard = ({ card, featured = false }: any) => {
 
 const WhyLearn = () => {
   return (
-    <section className="bg-[#0B0B0B] py-24">
+    <section className="bg-near-black py-24">
       <Container>
         <div className="mb-16 text-center">
-          <p className="text-[11px] uppercase tracking-[0.3em] text-[#FAD90C]">
+          <p className="text-[11px] uppercase tracking-[0.3em]  text-gold">
             The SBS Difference
           </p>
 
@@ -119,7 +119,7 @@ const WhyLearn = () => {
             md:grid-cols-[80px_1fr_2fr]
             ${
               index === 6
-                ? "bg-[#FAD90C] px-8 rounded-3xl my-8 border-none"
+                ? "bg-gold px-8 rounded-3xl my-8 border-none"
                 : ""
             }
             `}
@@ -127,7 +127,7 @@ const WhyLearn = () => {
               <span
                 className={`
               font-display text-4xl font-bold
-              ${index === 6 ? "text-black/30" : "text-[#FAD90C]/40"}
+              ${index === 6 ? "text-black/30" : " text-gold/40"}
               `}
               >
                 0{index + 1}

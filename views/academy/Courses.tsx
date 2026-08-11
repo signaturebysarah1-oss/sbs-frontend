@@ -113,10 +113,10 @@ const ProgrammeCard = ({
       }`}
     >
       {/* Card */}
-      <div className="group w-full rounded-3xl border border-white/10 bg-[#141414] p-8 transition-all duration-500 hover:-translate-y-2 hover:border-[#FAD90C]/40 hover:bg-[#1A1A1A] lg:w-[46%]">
+      <div className="group w-full rounded-3xl border border-white/10 bg-[#141414] p-8 transition-all duration-500 hover:-translate-y-2 hover:border-gold/40 hover:bg-[#1A1A1A] lg:w-[46%]">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-[#FAD90C]">
+            <p className="text-sm uppercase tracking-[0.35em]  text-gold">
               {programme.level}
             </p>
 
@@ -125,8 +125,8 @@ const ProgrammeCard = ({
             </h3>
           </div>
 
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#FAD90C]/10 ring-1 ring-[#FAD90C]/20">
-            <Icon className="h-8 w-8 text-[#FAD90C]" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gold/10 ring-1 ring-gold/20">
+            <Icon className="h-8 w-8  text-gold" />
           </div>
         </div>
 
@@ -138,7 +138,7 @@ const ProgrammeCard = ({
           {programme.skills.map((skill) => (
             <span
               key={skill}
-              className="rounded-full border border-[#FAD90C]/20 bg-[#FAD90C]/5 px-4 py-2 text-xs uppercase tracking-wider text-[#FAD90C]"
+              className="rounded-full border border-gold/20 bg-gold/5 px-4 py-2 text-xs uppercase tracking-wider  text-gold"
             >
               {skill}
             </span>
@@ -148,12 +148,12 @@ const ProgrammeCard = ({
 
       {/* Timeline */}
       <div className="absolute left-1/2 hidden -translate-x-1/2 lg:block">
-        <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-4 border-[#FAD90C] bg-[#0B0B0B]">
-          <span className="font-display text-3xl font-bold text-[#FAD90C]">
+        <div className="relative flex h-24 w-24 items-center justify-center rounded-full border-4 border-gold bg-near-black">
+          <span className="font-display text-3xl font-bold  text-gold">
             {programme.number}
           </span>
 
-          <div className="absolute -bottom-24 left-1/2 h-24 w-[2px] -translate-x-1/2 bg-gradient-to-b from-[#FAD90C] to-transparent" />
+          <div className="absolute -bottom-24 left-1/2 h-24 w-0.5 -translate-x-1/2 bg-linear-to-b from-gold to-transparent" />
         </div>
       </div>
 
@@ -164,12 +164,12 @@ const ProgrammeCard = ({
 
 const Courses = () => {
   return (
-    <section className="bg-[#0B0B0B]  py-24 ">
+    <section className="bg-near-black  py-24 ">
       <Container className="">
         {/* Header */}
 
         <div className="mx-auto mb-24 max-w-3xl text-center">
-          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.35em] text-[#FAD90C]">
+          <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.35em]  text-gold">
             SBS CURRICULUM
           </p>
 
@@ -177,7 +177,7 @@ const Courses = () => {
             Our Training Programmes
           </h2>
 
-          <div className="mx-auto my-8 h-[3px] w-20 bg-[#FAD90C]" />
+          <div className="mx-auto my-8 h-0.75 w-20 bg-gold" />
 
           <p className="text-lg leading-8 text-white/60">
             Every programme is intentionally designed to move you from learning
@@ -189,7 +189,7 @@ const Courses = () => {
         {/* Journey */}
 
         <div className="relative space-y-24">
-          <div className="absolute left-1/2 top-0 hidden h-full w-[2px] -translate-x-1/2 bg-[#FAD90C]/20 lg:block" />
+          <div className="absolute left-1/2 top-0 hidden h-full w-0.5 -translate-x-1/2 bg-gold/20 lg:block" />
 
           {programmes.map((programme, index) => (
             <div key={programme.number}>
@@ -200,7 +200,7 @@ const Courses = () => {
 
               {index !== programmes.length - 1 && (
                 <div className="mt-10 flex justify-center lg:hidden">
-                  <ArrowDown className="h-8 w-8 text-[#FAD90C]" />
+                  <ArrowDown className="h-8 w-8  text-gold" />
                 </div>
               )}
             </div>

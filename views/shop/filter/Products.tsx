@@ -6,8 +6,6 @@ import { HeartIcon } from "lucide-react";
 import ViewModal from "../ViewModal";
 import { useState } from "react";
 import { Product } from "@/types/website";
-import { getProducts } from "@/providers/get";
-import { useQuery } from "@tanstack/react-query";
 import ProductSkeleton from "./Skeleton";
 import EmptyProductsState from "../EmptyState";
 
@@ -30,32 +28,28 @@ const Products = ({ products, error, isLoading, category }: products) => {
     );
   }
 
- 
   // Empty
-if (products.length === 0) {
-  return (
-    <EmptyProductsState />
-
-  );
-}
+  if (products.length === 0) {
+    return <EmptyProductsState />;
+  }
 
   return (
     <Container>
-      <div className="my-8 grid grid-cols-3 gap-5">
+      <div className="my-8 grid grid-cols-2 md:grid-cols-3 gap-5">
         {products.map((product) => {
           const primaryImage =
             product.images.find((img) => img.isPrimary) ?? product.images[0];
 
           const hoverImage = product.images[1] ?? primaryImage;
-
+          console.log(primaryImage);
           return (
             <article
               key={product.id}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-[#EAE6DD] bg-white transition-all duration-300"
+              className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white transition-all duration-300"
             >
               {/* Image */}
-              <div className="relative overflow-hidden bg-[#F8F6F2]">
-                <div className="relative aspect-[3/4] overflow-hidden rounded-t-lg">
+              <div className="relative overflow-hidden bg-off-white">
+                <div className="relative aspect-3/4 overflow-hidden rounded-t-lg">
                   {primaryImage && (
                     <Image
                       src={primaryImage.imageUrl}
@@ -77,15 +71,15 @@ if (products.length === 0) {
                   )}
                 </div>
 
-                <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+                {/* <div className="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
                   {product.isFeatured && (
-                    <span className="inline-block rounded-full bg-[#0B0B0B] px-2.5 py-[3px] text-[9px] font-bold uppercase tracking-[0.12em] text-[#FAD90C]">
+                    <span className="inline-block rounded-full bg-near-black px-2.5 py-0.75 text-[9px] font-bold uppercase tracking-[0.12em]  text-gold">
                       Featured
                     </span>
                   )}
-                </div>
+                </div> */}
 
-                <button className="absolute top-3 right-3 z-10 flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white/90 transition-transform">
+                <button className="absolute top-3 right-3 z-10 flex h-8.5 w-8.5 items-center justify-center rounded-full bg-white/90 transition-transform">
                   <HeartIcon />
                 </button>
 
@@ -95,22 +89,33 @@ if (products.length === 0) {
                       setSelectedProduct(product);
                       setOpen(true);
                     }}
-                    className="w-full rounded-lg bg-[#0B0B0B]/90 px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-[#F8F6F2] backdrop-blur-md transition-colors hover:bg-[#FAD90C] hover:text-[#0B0B0B]"
+                    className="w-full rounded-lg bg-near-black/90 px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-off-white backdrop-blur-md transition-colors hover:bg-gold hover:text-near-black"
                   >
-                    Quick View
+                   View details
+                  </button>
+                </div>
+                <div className="absolute right-0 bottom-0 left-0 z-10 flex justify-center p-3 opacity-100 md:translate-y-full md:opacity-0 md:transition-all md:duration-300 md:group-hover:translate-y-0 md:group-hover:opacity-100">
+                  <button
+                    onClick={() => {
+                      setSelectedProduct(product);
+                      setOpen(true);
+                    }}
+                    className="w-full rounded-lg bg-gold px-6 py-1.5 lg:py-2.5 text-[10px] font-bold uppercase tracking-[0.14em] text-black backdrop-blur-md transition-colors hover:bg-gold hover:text-near-black"
+                  >
+                   View details
                   </button>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="flex flex-1 flex-col gap-1.5 p-[18px] pb-5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[9px] font-semibold uppercase tracking-[0.18em] text-[#FAD90C]">
+              <div className="flex flex-1 flex-col gap-1.5 p-4.5 pb-5">
+                {/* <div className="flex items-center justify-between">
+                  <span className="text-[9px] font-semibold uppercase tracking-[0.18em]  text-gold">
                     {product.collections[0]?.name ?? product.category}
                   </span>
-                </div>
+                </div> */}
 
-                <h3 className="font-display text-[17px] font-semibold leading-[1.2] text-[#0B0B0B]">
+                <h3 className="font-display text-xs lg:text-[17px] font-semibold leading-[1.2] text-near-black">
                   {product.name}
                 </h3>
 
@@ -119,7 +124,7 @@ if (products.length === 0) {
                 </span>
 
                 {product.colors.length > 0 && (
-                  <div className="mt-0.5 flex gap-[5px]">
+                  <div className="mt-0.5 flex gap-1.25">
                     {product.colors.slice(0, 3).map((color) => (
                       <div
                         key={color.id}
@@ -136,7 +141,7 @@ if (products.length === 0) {
                     )}
                   </div>
                 )}
-                <h3 className="font-display text-[17px] font-semibold leading-[1.2] text-[#0B0B0B]">
+                <h3 className="font-display text-[17px] font-semibold leading-[1.2] text-near-black">
                   ₦{product.basePrice}
                 </h3>
               </div>
