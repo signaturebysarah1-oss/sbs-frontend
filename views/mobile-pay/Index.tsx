@@ -9,6 +9,7 @@ import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
 const ACCOUNT_NUMBER = "0000000000";
 
 const MobilePaymentPage = () => {
+  //user
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session");
 
