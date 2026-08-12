@@ -154,7 +154,7 @@ const ShoeStyle = ({ selections, select }: ShoeStyleProps) => {
     </p>
 
     <p className="mt-2 text-sm text-[#888]">
-      Choose a style above to view the available products.
+      Choose a category above to view the available products.
     </p>
   </div>
 ) : (

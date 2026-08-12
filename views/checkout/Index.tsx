@@ -117,7 +117,7 @@ const CheckoutPage = () => {
 
   const isComplete =
     customer.email.trim() &&
-    customer.phone.trim() &&
+    // customer.phone.trim() &&
     delivery.address.trim() &&
     delivery.city.trim() &&
     delivery.state.trim() &&
