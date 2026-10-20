@@ -5,8 +5,10 @@ import { toast } from "sonner";
 import { ArrowRight, Check, GraduationCap, Sparkles } from "lucide-react";
 import Container from "@/components/ui/shared/Container";
 import { useRegisterAcademy } from "@/hooks/useSubmitContacts";
+import SuccessModal from "@/components/ui/modals/SuccesModal";
 
 const AcademyRegistration = () => {
+  const [showSuccess, setShowSuccess] = useState(false);
   const { mutate: registerAcademy, isPending } = useRegisterAcademy();
 
   const [form, setForm] = useState({
@@ -14,11 +16,7 @@ const AcademyRegistration = () => {
     email: "",
     phone: "",
     country: "",
-    experienceLevel: "" as
-      | ""
-      | "beginner"
-      | "intermediate"
-      | "advanced",
+    experienceLevel: "" as "" | "beginner" | "intermediate" | "advanced",
     motivation: "",
   });
 
@@ -77,7 +75,8 @@ const AcademyRegistration = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Application submitted successfully");
+          // toast.success("Application submitted successfully");
+          setShowSuccess(true);
 
           setForm({
             fullName: "",
@@ -92,8 +91,7 @@ const AcademyRegistration = () => {
         onError: (error: any) => {
           console.error(error);
           toast.error(
-            error?.message ||
-              "Failed to submit application. Please try again."
+            error?.message || "Failed to submit application. Please try again."
           );
         },
       }
@@ -141,8 +139,8 @@ const AcademyRegistration = () => {
 
             <p className="mt-7 max-w-lg text-sm leading-7 text-[#999]">
               Step into the world of leather craftsmanship with SBS Academy.
-              Learn practical techniques, develop your creativity, and build
-              the confidence to create exceptional pieces by hand.
+              Learn practical techniques, develop your creativity, and build the
+              confidence to create exceptional pieces by hand.
             </p>
 
             <div className="mt-10 space-y-5">
@@ -328,13 +326,19 @@ const AcademyRegistration = () => {
               </button>
 
               <p className="text-center text-[11px] leading-5 text-[#555]">
-                By submitting this application, you agree to be contacted by
-                SBS Academy regarding your application.
+                By submitting this application, you agree to be contacted by SBS
+                Academy regarding your application.
               </p>
             </form>
           </div>
         </div>
       </Container>
+      <SuccessModal
+  open={showSuccess}
+  onOpenChange={setShowSuccess}
+  title="Application Submitted!"
+  description="Thank you for applying to SBS Academy. We've received your application and will be in touch with you soon."
+/>
     </section>
   );
 };

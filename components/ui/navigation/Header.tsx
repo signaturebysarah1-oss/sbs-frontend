@@ -126,7 +126,8 @@ const Header = () => {
     { label: "Shop", href: "/product" },
     { label: "Custom Order", href: "/custom" },
     { label: "Academy", href: "/academy" },
-    { label: "Size Guide", href: "/size-guide" },
+    { label: "Size Guide", href: "/guide" },
+    { label: "Gallery", href: "/gallery" },
     { label: "Contact", href: "/contact" },
   ];
 
@@ -173,7 +174,7 @@ const Header = () => {
                   (href !== "/" && pathname.startsWith(href));
 
                 return (
-                  <a
+                  <Link
                     key={href}
                     href={href}
                     className={`
@@ -186,24 +187,30 @@ const Header = () => {
                   `}
                   >
                     {label}
-                  </a>
+                  </Link>
                 );
               })}
+              {session && (
+                <Link
+                  href="history"
+                  className="text-white/75 hover:text-gold"
+                >
+                  History
+                </Link>
+              )}
             </div>
 
             <div className="flex items-center gap-5">
-              <button className="hidden lg:block text-white/70 hover:text-gold transition">
-                <SearchIcon size={20} />
-              </button>
+             
 
               <button className="hidden lg:block text-white/70 hover:text-gold transition">
                 <HeartIcon size={20} />
               </button>
 
-                <span className="relative  text-white/70 hover:text-gold transition">
-                  <CartSidebar/>
+              <span className="relative  text-white/70 hover:text-gold transition">
+                <CartSidebar />
 
-                  {/* {cartCount > 0 && (
+                {/* {cartCount > 0 && (
                     <span
                       className="
                     absolute -top-2 -right-2
@@ -223,7 +230,7 @@ const Header = () => {
                       )}
                     </span>
                   )} */}
-                </span>
+              </span>
 
               <button
                 onClick={() => setMobileOpen(true)}
@@ -246,16 +253,6 @@ const Header = () => {
                   </DropdownMenuGroup>
 
                   <DropdownMenuGroup>
-                    <DropdownMenuItem>
-                      <Link
-                        href="history"
-                        className="flex items-center gap-2 text-black hover:text-gold transition"
-                      >
-                        <HistoryIcon className="text-black" size={16} />
-                        History
-                      </Link>
-                    </DropdownMenuItem>
-
                     <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                       {session ? (
                         <button

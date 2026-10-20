@@ -218,7 +218,7 @@ const ShoeStyle = ({ selections, select }: ShoeStyleProps) => {
                 }`}
               >
                 {primaryImage && (
-                  <div className="relative aspect-[3/4] w-full overflow-hidden bg-[#f8f6f2]">
+                  <div className="relative h-40 w-full overflow-hidden bg-[#f8f6f2]">
                     <Image
                       src={primaryImage}
                       alt={product.name || "Product"}
@@ -229,7 +229,7 @@ const ShoeStyle = ({ selections, select }: ShoeStyleProps) => {
                 )}
 
                 <div className="p-4">
-                  <h3 className="font-display text-lg font-semibold text-near-black">
+                  <h3 className="font-display text-sm font-semibold text-near-black">
                     {product.name}
                   </h3>
 

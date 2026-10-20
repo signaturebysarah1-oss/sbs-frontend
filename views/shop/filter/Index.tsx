@@ -43,7 +43,7 @@ const Index = () => {
   }
 
   return (
-    <section className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
+    <section className="grid grid-cols-1  bg-[#e9e9e9d7] gap-8 lg:grid-cols-[280px_1fr]">
       {/* Desktop Sidebar */}
       <div className="hidden lg:block">
         <ProductFiltersSidebar

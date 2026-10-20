@@ -82,3 +82,44 @@ export const useSubmitCart = () => {
     },
   });
 };
+export const useUpdateCartAddress = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: {
+      address: string | null;
+      city: string | null;
+      state: string | null;
+    }) =>
+      authFetch("api/cart", {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: CART_QUERY_KEY,
+      });
+    },
+  });
+};
+
+export const useUpdateCart = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: {
+      address?: string | null;
+      city?: string | null;
+      state?: string | null;
+      paymentUrl?: string | null;
+      receiptUrl?: string | null;
+    }) =>
+      authFetch("api/cart", {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["my-quotes"] });
+    },
+  });
+};

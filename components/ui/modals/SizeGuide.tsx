@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogTitle,
@@ -200,14 +201,21 @@ const MeasurementGuideModal = ({
             className="h-52 w-full resize-none rounded-2xl bg-white/10 p-5 text-sm leading-7 whitespace-pre-wrap text-white outline-none"
           />
 
-          <button
+          {/* <button
             onClick={copyProfile}
             className="mt-5 flex w-full items-center justify-center gap-3 rounded-xl bg-gold py-4 text-sm font-bold uppercase tracking-[0.15em] text-[#111]"
           >
             <Copy size={18} />
             Copy Fit Profile
-          </button>
+          </button> */}
+          <DialogClose
+            className="mt-5 flex w-full items-center justify-center gap-3 rounded-xl bg-gold py-4 text-sm font-bold uppercase tracking-[0.15em] text-[#111]"
+          
+          >
+          Save
+        </DialogClose>
         </div>
+       
       </DialogContent>
     </Dialog>
   );

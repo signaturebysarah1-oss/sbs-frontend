@@ -9,7 +9,7 @@ const ProductSkeleton = () => {
           className="overflow-hidden rounded-2xl border border-zinc-200 bg-zinc-50"
         >
           {/* Image */}
-          <Skeleton className="aspect-3/4 w-full rounded-none bg-zinc-300" />
+          <Skeleton className="h-70 w-full rounded-none bg-zinc-300" />
 
           <div className="space-y-4 p-5">
             <Skeleton className="h-2 w-20 bg-zinc-300" />

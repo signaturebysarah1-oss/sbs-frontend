@@ -110,7 +110,10 @@ const CheckoutPaymentEvidence = ({
 
           <button
             type="button"
-            onClick={() => onChange("")}
+            onClick={() => {
+              setError("");
+              onChange("");
+            }}
             className="rounded-lg p-2 text-red-500 transition hover:bg-red-100"
           >
             <X size={17} />

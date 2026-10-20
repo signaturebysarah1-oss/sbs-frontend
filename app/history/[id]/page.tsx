@@ -1,4 +1,4 @@
-import HistoryView from '@/views/history/HistoryView'
+import HistoryView from '@/views/history/history-view/HistoryView'
 import { Suspense } from 'react'
 
 const page = () => {

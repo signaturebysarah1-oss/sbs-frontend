@@ -10,22 +10,23 @@ import Color from "./orders/Color";
 import ToeShape from "./orders/ToeShape";
 import Measurement from "./orders/Measurement";
 import Review from "./orders/Review";
+import Personalize from "./orders/Personalize";
 
 const CustomPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const totalSteps = 6;
+  const totalSteps = 7;
 
   const [step, setStep] = useState(1);
 
-  const [selections, setSelections] = useState<Record<string, any>>({
-    shoeNameSnapshot: "",
-    material: "",
-    color: "",
-    toeStyleSnapshot: "",
-    customMeasurements: {},
-  });
+  // const [selections, setSelections] = useState<Record<string, any>>({
+  //   shoeNameSnapshot: "",
+  //   material: "",
+  //   color: "",
+  //   toeStyleSnapshot: "",
+  //   customMeasurements: {},
+  // });
 
   const steps = [
     "Shoe Style",
@@ -36,19 +37,35 @@ const CustomPage = () => {
     "Review",
   ];
 
+  const [selections, setSelections] = useState<Record<string, any>>({
+    shoeNameSnapshot: "",
+    material: "",
+    color: "",
+    toeStyleSnapshot: "",
+    customMeasurements: {},
+  });
+  
+  const [hasLoadedSelections, setHasLoadedSelections] = useState(false);
+  
   useEffect(() => {
-    const savedSelections = localStorage.getItem("sbs-custom-order");
-
-    if (savedSelections) {
-      setSelections(JSON.parse(savedSelections));
+    try {
+      const savedSelections = localStorage.getItem("sbs-custom-order");
+  
+      if (savedSelections) {
+        setSelections(JSON.parse(savedSelections));
+      }
+    } catch (error) {
+      console.error("Failed to load saved custom order:", error);
+    } finally {
+      setHasLoadedSelections(true);
     }
   }, []);
-
+  
   useEffect(() => {
-    if (Object.keys(selections).length > 0) {
-      localStorage.setItem("sbs-custom-order", JSON.stringify(selections));
-    }
-  }, [selections]);
+    if (!hasLoadedSelections) return;
+  
+    localStorage.setItem("sbs-custom-order", JSON.stringify(selections));
+  }, [selections, hasLoadedSelections]);
 
   useEffect(() => {
     const urlStep = Number(searchParams.get("step"));
@@ -144,7 +161,9 @@ const CustomPage = () => {
       case 5:
         return <Measurement selections={selections} select={select} />;
       case 6:
-        return <Review selections={selections} select={select} />;
+        return <Personalize selections={selections} select={select} />;
+        case 7:
+          return <Review selections={selections} select={select} />;
       default:
         return null;
     }

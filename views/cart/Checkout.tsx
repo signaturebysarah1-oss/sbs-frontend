@@ -13,30 +13,9 @@ import { authQuery } from "@/providers/query";
 import { useCreateQuote } from "@/hooks/useCreateQuotes";
 import { clearGuestCart } from "@/services/guest-items";
 import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
+import { CheckoutForm, QuoteItem } from "@/types/website";
 
-interface QuoteItem {
-  id?: string;
-  productId: string;
-  productNameSnapshot: string;
-  imageUrlSnapshot: string;
-  selectedMaterial?: string;
-  selectedColor?: string;
-  quantity: number;
-  unitPriceSnapshot: number;
-  customNotes?: string;
-}
 
-interface CheckoutForm {
-  fullName: string;
-  email: string;
-  phone: string;
-
-  address: string;
-  city: string;
-  state: string;
-
-  paymentReference: string;
-}
 
 const CheckoutPage = () => {
   const router = useRouter();
@@ -71,11 +50,7 @@ const CheckoutPage = () => {
     enabled: isLoggedIn,
   });
 
-  /*
-   * --------------------------------------------------------------------------
-   * SESSION
-   * --------------------------------------------------------------------------
-   */
+ 
 
   useEffect(() => {
     const checkSession = async () => {
@@ -91,10 +66,7 @@ const CheckoutPage = () => {
   }, []);
 
   /*
-   * --------------------------------------------------------------------------
    * LOAD CART
-   * --------------------------------------------------------------------------
-   *
    * Logged-in users:
    *   cart was already saved before authentication.
    *
@@ -136,9 +108,7 @@ const CheckoutPage = () => {
   }, [isLoggedIn, checkingSession]);
 
   /*
-   * --------------------------------------------------------------------------
-   * PROFILE
-   * --------------------------------------------------------------------------
+   * LAOD PROFILE
    */
 
   useEffect(() => {
@@ -159,9 +129,7 @@ const CheckoutPage = () => {
   }, [isLoggedIn, profileData]);
 
   /*
-   * --------------------------------------------------------------------------
    * TOTAL
-   * --------------------------------------------------------------------------
    */
 
   const total = items.reduce(
@@ -173,9 +141,7 @@ const CheckoutPage = () => {
   const fmt = (value: number) => `₦${value.toLocaleString()}`;
 
   /*
-   * --------------------------------------------------------------------------
    * FORM
-   * --------------------------------------------------------------------------
    */
 
   const updateField = (
@@ -189,9 +155,7 @@ const CheckoutPage = () => {
   };
 
   /*
-   * --------------------------------------------------------------------------
    * RECEIPT UPLOAD
-   * --------------------------------------------------------------------------
    */
 
   const handleReceiptChange = async (
@@ -200,15 +164,6 @@ const CheckoutPage = () => {
     const file = e.target.files?.[0];
 
     if (!file) return;
-
-    /*
-     * Keep this reasonably broad because payment evidence can be:
-     * - JPG
-     * - JPEG
-     * - PNG
-     * - WEBP
-     * - PDF
-     */
 
     const allowedTypes = [
       "image/jpeg",
@@ -227,9 +182,6 @@ const CheckoutPage = () => {
       return;
     }
 
-    /*
-     * 10MB maximum.
-     */
 
     if (file.size > 10 * 1024 * 1024) {
       toast.error("Payment evidence must be less than 10MB.");
@@ -271,9 +223,7 @@ const CheckoutPage = () => {
   };
 
   /*
-   * --------------------------------------------------------------------------
    * VALIDATION
-   * --------------------------------------------------------------------------
    */
 
   const isFormComplete =
@@ -290,9 +240,7 @@ const CheckoutPage = () => {
     items.length > 0;
 
   /*
-   * --------------------------------------------------------------------------
    * SUBMIT
-   * --------------------------------------------------------------------------
    */
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -372,7 +320,7 @@ const CheckoutPage = () => {
          * Custom order cleanup if one exists.
          */
 
-        localStorage.removeItem("sbs-custom-order");
+        // localStorage.removeItem("sbs-custom-order");
 
         setShowSuccess(true);
       },
@@ -387,11 +335,7 @@ const CheckoutPage = () => {
     });
   };
 
-  /*
-   * --------------------------------------------------------------------------
-   * LOADING
-   * --------------------------------------------------------------------------
-   */
+ 
 
   if (
     checkingSession ||
@@ -407,11 +351,6 @@ const CheckoutPage = () => {
     );
   }
 
-  /*
-   * --------------------------------------------------------------------------
-   * EMPTY
-   * --------------------------------------------------------------------------
-   */
 
   if (items.length === 0) {
     return (

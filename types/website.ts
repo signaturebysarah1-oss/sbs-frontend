@@ -395,3 +395,72 @@ export interface Order {
 
   statusHistory?: StatusHistory[];
 }
+
+
+
+export interface CheckoutForm {
+  fullName: string;
+  email: string;
+  phone: string;
+
+  address: string;
+  city: string;
+  state: string;
+
+  paymentReference: string;
+}
+
+export interface CartHistoryItem {
+  productId?: string | null;
+  productNameSnapshot?: string | null;
+  imageUrlSnapshot?: string | null;
+  quantity: number;
+  selectedSize?: number | string | null;
+  selectedColor?: string | null;
+  selectedMaterial?: string | null;
+  unitPriceSnapshot: number;
+}
+
+export interface CartHistory {
+  id: string;
+  originalCartId?: string;
+  items: CartHistoryItem[];
+  totalSnapshot: number;
+  completedAt?: string | null;
+  createdAt: string;
+  status?: string;
+  orderNumber?: string;
+}
+
+
+
+export type CustomizationOption = {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  imageUrl: string | null;
+  imagePublicId: string | null;
+  description: string | null;
+  status: "active" | "inactive";
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type CustomizationCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  status: "active" | "inactive";
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+  options: CustomizationOption[];
+};
+
+export type CustomizationsResponse = {
+  success: boolean;
+  message: string;
+  data: CustomizationCategory[];
+};

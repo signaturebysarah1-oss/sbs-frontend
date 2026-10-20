@@ -45,17 +45,21 @@ const ProductFiltersSidebar = ({ products, isLoading }: products) => {
 
   const materialsMap = new Map(allMaterials.map((item) => [item.name, item]));
 
-  const collections = [
-    ...new Set(
+  const collections = Array.from(
+    new Map(
       products.flatMap(
         (item) =>
-          item.collections?.map((c) => ({
-            name: c.name,
-            slug: c.slug,
-          })) || []
+          item.collections?.map((c) => [
+            c.name,
+            {
+              name: c.name,
+              slug: c.slug,
+            },
+          ]) || []
       )
-    ),
-  ];
+    ).values()
+  );
+  
   console.log(collections, "collections");
   const material = Array.from(materialsMap.values());
   const router = useRouter();
@@ -112,7 +116,7 @@ const ProductFiltersSidebar = ({ products, isLoading }: products) => {
             Clear
           </Button>
         </div>
-        <Separator />
+        {/* <Separator />
         <section>
           <h3 className="mb-3 font-medium">Collections</h3>
           <div className="space-y-3">
@@ -131,7 +135,7 @@ const ProductFiltersSidebar = ({ products, isLoading }: products) => {
               </label>
             ))}
           </div>
-        </section>
+        </section> */}
         <Separator />
         <section>
           <h3 className="mb-3 font-medium">Category</h3>

@@ -5,10 +5,11 @@ import { useState } from "react";
 import { toast } from "sonner";
 import Container from "@/components/ui/shared/Container";
 import { useSubmitContact } from "@/hooks/useSubmitContacts";
+import SuccessModal from "@/components/ui/modals/SuccesModal";
 
 const Contacts = () => {
   const { mutate: submitContact, isPending } = useSubmitContact();
-
+  const [showSuccess, setShowSuccess] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -56,7 +57,7 @@ const Contacts = () => {
       },
       {
         onSuccess: () => {
-          toast.success("Message sent successfully");
+          setShowSuccess(true);
 
           setForm({
             name: "",
@@ -247,6 +248,12 @@ const Contacts = () => {
           </div>
         </div>
       </Container>
+      <SuccessModal
+  open={showSuccess}
+  onOpenChange={setShowSuccess}
+  title="Message Sent Successfully!"
+  description="Thank you for reaching out to us. We've received your message and will get back to you as soon as possible."
+/>
     </section>
   );
 };

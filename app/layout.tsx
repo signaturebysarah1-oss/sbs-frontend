@@ -50,7 +50,7 @@ export default function RootLayout({
           <AuthProvider>
             <Header />
             <AOSProvider />
-            {children}
+           <div className="min-h-screen"> {children}</div>
             <Footer />
           </AuthProvider>
         </QueryProvider>

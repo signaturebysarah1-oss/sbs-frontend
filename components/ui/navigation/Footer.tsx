@@ -17,7 +17,7 @@ const Footer = () => {
       title: "Services",
       links: [
         ["Custom Order", "/custom"],
-        ["Size Guide", "/size-guide"],
+        ["Size Guide", "/guide"],
         ["About", "/about"],
         ["Contact", "/contact"],
       ],

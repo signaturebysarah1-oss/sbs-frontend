@@ -20,17 +20,24 @@ const QuoteChoiceModal = ({
   if (!open) return null;
 
   const loginWithGoogle = async () => {
-    localStorage.setItem("auth_redirect", "/checkout");
+    const returnTo =
+      window.location.pathname + window.location.search + window.location.hash;
 
-    localStorage.setItem("guest-cart", JSON.stringify(items));
+    localStorage.setItem("auth_redirect", returnTo);
+    localStorage.setItem("guest-cart", JSON.stringify(items ?? []));
 
-    await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
+
+    if (error) {
+      console.error("Google sign-in failed:", error.message);
+    }
   };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-5">
       <div className="w-full max-w-md rounded-2xl bg-white p-8">
@@ -41,23 +48,23 @@ const QuoteChoiceModal = ({
         <p className="mt-3 text-sm text-[#777]">
           Submit your quote request without creating an account. Your details
           will only be used for this request and won't be saved for future
-          purchases.{" "}
+          purchases.
         </p>
 
         <button
           onClick={loginWithGoogle}
-          className="mt-6 w-full flex items-center justify-center gap-1  rounded-xl bg-near-black py-4 text-xs font-bold uppercase tracking-wider text-[white]"
+          className="mt-6 flex w-full items-center justify-center gap-1 rounded-xl bg-near-black py-4 text-xs font-bold uppercase tracking-wider text-white"
         >
-          <img src="/googles.png" className="w-5" /> Continue with Google
+          <img src="/googles.png" alt="Google" className="w-5" />
+          Continue with Google
         </button>
 
-        <div className="mt-3 w-full text-center rounded-xl border border-border py-4 text-xs font-bold uppercase tracking-wider text-near-black">
-          <Link
-            // onClick={onContinueAsGuest}
-            href="/checkout"
-          >
-            Continue as Guest
-          </Link>
+        <div>
+          {/* <Link href="/checkout"> */}
+            <div onClick={()=> onContinueAsGuest()} className="mt-3 w-full rounded-xl border border-border py-4 text-center text-xs font-bold uppercase tracking-wider text-near-black">
+              Continue as Guest
+            </div>
+          {/* </Link> */}
         </div>
 
         <button

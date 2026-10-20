@@ -294,3 +294,19 @@ a, button {
   height: 2px;
   background: #FAD90C;
 }
+
+.glass-panel {
+  /* Semi-transparent background (white with low opacity) */
+  background: rgba(255, 255, 255, 0.15); 
+  
+  /* Frosted glass blur effect */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px); /* Safari support */
+  
+  /* Subtle glass border highlight */
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  
+  /* Smooth corners and shadow for depth */
+  border-radius: 16px;
+  /* box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15); */
+}

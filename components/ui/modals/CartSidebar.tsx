@@ -305,12 +305,12 @@ const CartSidebar = () => {
                                 item.quantity - 1
                               )
                             }
-                            className="flex h-7 w-7 items-center justify-center rounded border border-border disabled:opacity-40"
+                            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded border border-[black] disabled:opacity-40"
                           >
-                            <Minus size={12} />
+                            <Minus size={12}  color="black"/>
                           </button>
 
-                          <span className="min-w-4 text-center text-xs font-bold">
+                          <span className="min-w-4 text-center text-xs text-black font-bold">
                             {item.quantity}
                           </span>
 
@@ -322,9 +322,9 @@ const CartSidebar = () => {
                                 item.quantity + 1
                               )
                             }
-                            className="flex h-7 w-7 items-center justify-center rounded border border-border"
+                            className="flex h-7 w-7 items-center cursor-pointer justify-center rounded border border-black"
                           >
-                            <Plus size={12} />
+                            <Plus size={12} color="black" />
                           </button>
                         </div>
 

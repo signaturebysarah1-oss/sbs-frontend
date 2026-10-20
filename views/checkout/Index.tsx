@@ -11,7 +11,10 @@ import { useSession } from "@/hooks/useSession";
 import { authQuery } from "@/providers/query";
 import { QuoteItem } from "@/types/website";
 import { getGuestCart, clearGuestCart } from "@/services/guest-items";
-import { useSubmitCart } from "@/hooks/useCartMutation";
+import {
+  useSubmitCart,
+  useUpdateCart,
+} from "@/hooks/useCartMutation";
 import { useCreateQuote } from "@/hooks/useCreateQuotes";
 
 import CheckoutCustomerForm from "./CheckoutCustomerForm";
@@ -44,13 +47,24 @@ const CheckoutPage = () => {
   const [contactMethod, setContactMethod] = useState<
     "email" | "whatsapp" | null
   >(null);
+
   const [phoneNumber, setPhoneNumber] = useState("");
+
   const [paymentEvidenceUrl, setPaymentEvidenceUrl] = useState("");
+
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const { mutate: createQuote, isPending: isCreatingQuote } = useCreateQuote();
+  const { mutate: createQuote, isPending: isCreatingQuote } =
+    useCreateQuote();
+
+  const updateCartMutation = useUpdateCart();
+
   const submitCartMutation = useSubmitCart();
-  const submitting = isCreatingQuote || submitCartMutation.isPending;
+
+  const submitting =
+    isCreatingQuote ||
+    updateCartMutation.isPending ||
+    submitCartMutation.isPending;
 
   const { data: profileData } = useQuery({
     queryKey: ["auth-me"],
@@ -64,12 +78,18 @@ const CheckoutPage = () => {
     enabled: !!session,
   });
 
+  /*
+   * Load guest cart only when the user is NOT logged in.
+   */
   useEffect(() => {
     if (session || isSessionLoading) return;
 
-    const loadGuestCart = () => setGuestItems(getGuestCart());
+    const loadGuestCart = () => {
+      setGuestItems(getGuestCart());
+    };
 
     loadGuestCart();
+
     window.addEventListener("storage", loadGuestCart);
     window.addEventListener("guest-cart-updated", loadGuestCart);
 
@@ -79,6 +99,9 @@ const CheckoutPage = () => {
     };
   }, [session, isSessionLoading]);
 
+  /*
+   * Populate customer information from the logged-in user's profile.
+   */
   useEffect(() => {
     if (!session) return;
 
@@ -93,7 +116,13 @@ const CheckoutPage = () => {
     });
   }, [profileData, session]);
 
-  const items: QuoteItem[] = session ? cartData?.data?.items ?? [] : guestItems;
+  /*
+   * Logged-in users use the server cart.
+   * Guests use the localStorage guest cart.
+   */
+  const items: QuoteItem[] = session
+    ? cartData?.data?.items ?? []
+    : guestItems;
 
   const total = useMemo(
     () =>
@@ -108,6 +137,15 @@ const CheckoutPage = () => {
 
   const existingPhone = profileData?.data?.phone ?? null;
 
+  /*
+   * Logged-in users must select a contact method.
+   *
+   * WhatsApp requires either an existing profile phone
+   * or a new phone number.
+   *
+   * Guests don't need this validation because their
+   * contact details are already collected in the customer form.
+   */
   const contactIsValid = session
     ? contactMethod !== null &&
       (contactMethod !== "whatsapp" ||
@@ -115,9 +153,11 @@ const CheckoutPage = () => {
         phoneNumber.trim().length > 7)
     : true;
 
+  /*
+   * Everything required before checkout can be submitted.
+   */
   const isComplete =
     customer.email.trim() &&
-    // customer.phone.trim() &&
     delivery.address.trim() &&
     delivery.city.trim() &&
     delivery.state.trim() &&
@@ -128,35 +168,82 @@ const CheckoutPage = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!isComplete) return;
+    if (!isComplete || submitting) return;
 
+    /*
+     * ============================================================
+     * LOGGED-IN CHECKOUT
+     * ============================================================
+     *
+     * First save the checkout information to the user's cart.
+     *
+     * PATCH /api/cart
+     *
+     * Then, only after the PATCH succeeds:
+     *
+     * POST /api/cart/submit
+     */
     if (session) {
-      submitCartMutation.mutate(
+      updateCartMutation.mutate(
         {
-          contactMethod: contactMethod!,
-          ...(contactMethod === "whatsapp" && !existingPhone
-            ? { phoneNumber: phoneNumber.trim() }
-            : {}),
+          address: delivery.address || null,
+          city: delivery.city || null,
+          state: delivery.state || null,
+          receiptUrl: paymentEvidenceUrl || null,
         },
         {
           onSuccess: () => {
-            setShowSuccess(true);
-            setTimeout(() => {
-              router.push("/product");
-            }, 5000);
+            submitCartMutation.mutate(
+              {
+                contactMethod: contactMethod!,
+                ...(contactMethod === "whatsapp" && !existingPhone
+                  ? {
+                      phoneNumber: phoneNumber.trim(),
+                    }
+                  : {}),
+              },
+              {
+                onSuccess: () => {
+                  setShowSuccess(true);
+
+                    router.push("/success");
+                },
+                onError: (error) => {
+                  console.error("Cart submission failed", error);
+                },
+              }
+            );
           },
           onError: (error) => {
-            console.error("Checkout failed", error);
+            console.error("Cart update failed", error);
           },
         }
       );
+
       return;
     }
 
+    /*
+     * ============================================================
+     * GUEST CHECKOUT
+     * ============================================================
+     *
+     * Guests don't have a server cart.
+     *
+     * Their cart lives in guest-cart localStorage.
+     *
+     * Everything needed for the quote is sent in one request.
+     */
     const payload = {
       guestName: customer.name,
       guestEmail: customer.email,
       guestPhone: customer.phone,
+
+      address: delivery.address || null,
+      city: delivery.city || null,
+      state: delivery.state || null,
+      receiptUrl: paymentEvidenceUrl || null,
+
       items: items.map((item) => ({
         productId: item.productId,
         productNameSnapshot: item.productNameSnapshot,
@@ -171,18 +258,27 @@ const CheckoutPage = () => {
 
     createQuote(payload, {
       onSuccess: () => {
+        /*
+         * Only clear the guest cart after the quote
+         * has successfully been created.
+         */
         clearGuestCart();
+
         setShowSuccess(true);
-        setTimeout(() => {
-          router.push("/product");
-        }, 5000);
+
+          router.push("/success");
       },
       onError: (error) => {
-        console.error("Checkout failed", error);
+        console.error("Guest checkout failed", error);
       },
     });
   };
 
+  /*
+   * Wait for the session first.
+   *
+   * If logged in, also wait for the server cart.
+   */
   if (isSessionLoading || (session && isCartLoading)) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center">
@@ -246,7 +342,10 @@ const CheckoutPage = () => {
                   }
                 />
 
-                <CheckoutPayment onReceiptReceived={setPaymentEvidenceUrl} />
+                <CheckoutPayment
+                  onReceiptReceived={setPaymentEvidenceUrl}
+                />
+
                 <CheckoutPaymentEvidence
                   value={paymentEvidenceUrl}
                   onChange={setPaymentEvidenceUrl}
@@ -268,7 +367,11 @@ const CheckoutPage = () => {
                 </button>
               </div>
 
-              <CheckoutOrderSummary items={items} total={total} fmt={fmt} />
+              <CheckoutOrderSummary
+                items={items}
+                total={total}
+                fmt={fmt}
+              />
             </div>
           </form>
         </div>

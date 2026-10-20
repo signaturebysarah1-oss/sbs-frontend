@@ -12,7 +12,10 @@ interface Props {
   onChange: (field: keyof DeliveryAddress, value: string) => void;
 }
 
-const CheckoutDeliveryForm = ({ delivery, onChange }: Props) => {
+const CheckoutDeliveryForm = ({
+  delivery,
+  onChange,
+}: Props) => {
   return (
     <div className="rounded-[20px] border border-border bg-white p-7 lg:p-9">
       <div className="mb-7">

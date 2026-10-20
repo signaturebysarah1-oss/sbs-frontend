@@ -1,6 +1,4 @@
-import QuoteHistoryPage from "@/views/history/Index";
-import React from "react";
-
+import QuoteHistoryPage from "@/views/history/history-page/Index";
 const page = () => {
   return <QuoteHistoryPage />;
 };

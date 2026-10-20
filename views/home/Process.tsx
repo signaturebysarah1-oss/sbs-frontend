@@ -1,4 +1,5 @@
 import Container from "@/components/ui/shared/Container";
+import Link from "next/link";
 
 const ProcessSection = () => {
   const steps = [
@@ -83,7 +84,7 @@ const ProcessSection = () => {
             </div>
 
             <div className="mt-12">
-              <button className="btn-gold">Start Custom Order</button>
+              <Link href={"/custom"} className="btn-gold">Start Custom Order</Link>
             </div>
           </div>
 

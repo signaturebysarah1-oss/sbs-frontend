@@ -1,9 +1,10 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
-import { HeroCarousel } from "@/types/website";
+import { HeroCarousel, Product } from "@/types/website";
 
 const slideVariants = {
   enter: (direction: number) => ({
@@ -28,21 +29,33 @@ const FALLBACK_IMAGES = [
   "https://images.unsplash.com/photo-1570800493677-12a7ad3d4d86?w=700&h=900&fit=crop&auto=format",
 ];
 
-interface HeroAnimation {
-  data: HeroCarousel[];
+interface HeroAnimationProps {
+  data: Product[];
 }
 
-const HeroAnimation = ({ data }: HeroAnimation) => {
-  const items = data || [];
-
+const HeroAnimation = ({ data }: HeroAnimationProps) => {
   const [activeImage, setActiveImage] = useState(0);
   const [slideDirection, setSlideDirection] = useState(1);
   const [isHoveringImage, setIsHoveringImage] = useState(false);
 
+  // Only featured products, limited to the first six.
+  const heroProducts = data
+    ?.filter((item) => item.isFeatured)
+    .slice(0, 6) ?? [];
+
+  // Keep your fallback images when there are no featured products.
   const heroImages =
-    data && data.length > 0
-      ? data.map((item: { imageUrl: string }) => item.imageUrl)
+    heroProducts.length > 0
+      ? heroProducts.map(
+          (item) =>
+            item.images?.find((image) => image.isPrimary)?.imageUrl ||
+            item.images?.[0]?.imageUrl ||
+            FALLBACK_IMAGES[0]
+        )
       : FALLBACK_IMAGES;
+
+  const activeProduct =
+    heroProducts.length > 0 ? heroProducts[activeImage] : null;
 
   const showImage = (nextImage: number) => {
     if (nextImage === activeImage) return;
@@ -52,7 +65,11 @@ const HeroAnimation = ({ data }: HeroAnimation) => {
   };
 
   useEffect(() => {
-    if (isHoveringImage || heroImages.length === 0) return;
+    setActiveImage(0);
+  }, [heroProducts.length]);
+
+  useEffect(() => {
+    if (isHoveringImage || heroImages.length <= 1) return;
 
     const interval = window.setInterval(() => {
       setSlideDirection(1);
@@ -90,9 +107,12 @@ const HeroAnimation = ({ data }: HeroAnimation) => {
             >
               <Image
                 src={heroImages[activeImage]}
-                alt={`Signature by Sarah footwear collection, look ${
-                  activeImage + 1
-                }`}
+                alt={
+                  activeProduct?.name ??
+                  `Signature by Sarah footwear collection, look ${
+                    activeImage + 1
+                  }`
+                }
                 fill
                 priority={activeImage === 0}
                 sizes="(max-width: 1024px) 80vw, 560px"
@@ -144,16 +164,34 @@ const HeroAnimation = ({ data }: HeroAnimation) => {
         </div>
 
         <div className="absolute bottom-[14%] left-0 z-[2] rounded-xl bg-near-black px-5 py-4 text-off-white shadow-[0_12px_40px_rgba(0,0,0,0.2)]">
-          <div className="mb-1.5 text-[9px] uppercase tracking-[0.18em]  text-gold">
-            New Arrival
+          <div className="mb-1.5 text-[9px] uppercase tracking-[0.18em] text-gold">
+            {activeProduct
+              ? activeProduct.isNewArrival
+                ? "New Arrival"
+                : "Featured Product"
+              : "New Arrival"}
           </div>
 
           <div className="text-[15px] font-semibold">
-            The Abuja Loafer
+            {activeProduct?.name ?? "The Abuja Loafer"}
           </div>
 
           <div className="mt-1 text-xs text-off-white/60">
-            Full Grain Leather · ₦185,000
+            {activeProduct
+              ? activeProduct.salePrice != null
+                ? (
+                    <>
+                      <span>
+                        ₦{activeProduct.salePrice.toLocaleString("en-NG")}
+                      </span>
+                      {" "}
+                      <span className="line-through opacity-60">
+                        ₦{activeProduct.basePrice.toLocaleString("en-NG")}
+                      </span>
+                    </>
+                  )
+                : `₦${activeProduct.basePrice.toLocaleString("en-NG")}`
+              : "Full Grain Leather · ₦185,000"}
           </div>
         </div>
       </div>

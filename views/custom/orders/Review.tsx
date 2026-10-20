@@ -108,12 +108,12 @@ const Review = ({ selections }: ReviewProps) => {
     createQuote(payload, {
       onSuccess: () => {
         localStorage.removeItem("sbs-custom-order");
-        setShowSuccess(true);
-      
-        setTimeout(() => {
-          router.push("/custom?step=1");
-          toast.success("Quote submitted successfully");
-        }, 3000);
+        // setShowSuccess(true);
+      router.push("/success")
+        // setTimeout(() => {
+        //   router.push("/custom?step=1");
+        //   toast.success("Quote submitted successfully");
+        // }, 3000);
       },
       onError: (error) => {
         console.error("Quote failed", error);
@@ -129,12 +129,12 @@ const Review = ({ selections }: ReviewProps) => {
     createQuote(payload, {
       onSuccess: () => {
         localStorage.removeItem("sbs-custom-order");
-        setShowSuccess(true);
-      
-        setTimeout(() => {
-          router.push("/custom?step=1");
-          toast.success("Quote submitted successfully");
-        }, 3000);
+        // setShowSuccess(true);
+        router.push("/success")
+        // setTimeout(() => {
+        //   router.push("/custom?step=1");
+        //   toast.success("Quote submitted successfully");
+        // }, 3000);
       },
 
       onError: (error) => {

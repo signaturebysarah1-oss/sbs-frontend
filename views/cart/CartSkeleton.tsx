@@ -5,15 +5,12 @@ const QuotePageSkeleton = () => {
   return (
     <div className="bg-off-white px-5 py-10 lg:px-10">
       <div className="flex justify-between gap-10">
-        {/* Left */}
         <div className="flex w-full flex-col gap-4 lg:w-[65%]">
-          {/* Header */}
           <div className="mb-2 flex items-center justify-between">
             <Skeleton className="h-7 w-40 bg-zinc-300" />
             <Skeleton className="h-4 w-32 bg-zinc-300" />
           </div>
 
-          {/* Quote Items */}
           {Array.from({ length: 3 }).map((_, index) => (
             <div
               key={index}

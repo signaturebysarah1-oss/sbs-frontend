@@ -49,7 +49,6 @@ const QuotePage = () => {
 
   const updateQuantityMutation = useUpdateCartItemQuantity();
   const removeItemMutation = useRemoveCartItem();
-  const submitCartMutation = useSubmitCart();
 
   const items: QuoteItem[] = session ? data?.data.items ?? [] : guestItems;
   const isLoading = isSessionLoading || (session ? isCartLoading : false);
@@ -202,10 +201,6 @@ const QuotePage = () => {
             items={items}
             total={total}
             fmt={fmt}
-            // customerNotes=""
-            // onCustomerNotesChange={() => {}}
-      
-            // isSubmittingLoggedInQuote={submitCartMutation.isPending}
           />
         )}
       </Container>

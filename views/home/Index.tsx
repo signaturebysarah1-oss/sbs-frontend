@@ -9,6 +9,7 @@ import HeroAnimation from "./HeroAnimation";
 import Container from "@/components/ui/shared/Container";
 import PageLoader from "@/components/ui/PageLoader";
 import Collections from "./Collections";
+import Link from "next/link";
 
 const HomePage = () => {
   const {
@@ -38,18 +39,18 @@ const HomePage = () => {
     queryFn: () => getProducts("api/products"),
   });
 
-  const {
-    data: animation,
-    isLoading: animationLoading,
-    error: animationError,
-  } = useQuery({
-    queryKey: ["hero-carousel"],
-    queryFn: () => getProducts("api/home/carousel"),
-  });
+  // const {
+  //   data: animation,
+  //   isLoading: animationLoading,
+  //   error: animationError,
+  // } = useQuery({
+  //   queryKey: ["hero-carousel"],
+  //   queryFn: () => getProducts("api/home/carousel"),
+  // });
 
-  const isLoading = featuredLoading || collectionLoading || animationLoading || productsLoading;
+  const isLoading = featuredLoading || collectionLoading  || productsLoading;
   // const error = featuredError || collectionError || animationError;
-  if (isLoading || collectionLoading || animationLoading) {
+  if (isLoading || collectionLoading ) {
     return <PageLoader />;
   }
 
@@ -102,12 +103,12 @@ const HomePage = () => {
               </p>
 
               <div className="flex flex-wrap gap-4">
-                <button className="btn-gold rounded-sm">Shop Collection</button>
-                <button className="btn-outline rounded-sm">Custom Order</button>
+                <Link href="/product" className="btn-gold rounded-sm">Shop Collection</Link>
+                <Link href={"/custom"} className="btn-outline rounded-sm">Custom Order</Link>
               </div>
             </div>
 
-            <HeroAnimation data={animation?.data} />
+            <HeroAnimation data={products?.data} />
           </div>
         </Container>
         <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2">

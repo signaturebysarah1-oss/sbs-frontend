@@ -17,35 +17,34 @@ const ProductCard = ({ product, onViewDetails }: ProductCardProps) => {
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white transition-all duration-300">
-      <div className="relative overflow-hidden bg-off-white">
-        <div className="relative aspect-[3/4] overflow-hidden rounded-t-lg">
-          {primaryImage && (
-            <Image
-              src={primaryImage.imageUrl}
-              alt={primaryImage.altText || product.name}
-              width={700}
-              height={900}
-              className="absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:opacity-0"
-            />
-          )}
+<div className="relative overflow-hidden rounded-t-lg border-b border-black/10 bg-[linear-gradient(135deg,#BDBDBD_0%,#D4D4D4_35%,#E7E7E7_65%,#F8F8F8_100%)]">  <div className="relative h-70 overflow-hidden">
+    {primaryImage && (
+      <Image
+        src={primaryImage.imageUrl}
+        alt={primaryImage.altText || product.name}
+        width={500}
+        height={500}
+        className="absolute inset-0 h-full w-full object-cover transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:opacity-0"
+      />
+    )}
 
-          {hoverImage && (
-            <Image
-              src={hoverImage.imageUrl}
-              alt={hoverImage.altText || product.name}
-              width={700}
-              height={900}
-              className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:opacity-100"
-            />
-          )}
-        </div>
+    {hoverImage && (
+      <Image
+        src={hoverImage.imageUrl}
+        alt={hoverImage.altText || product.name}
+        width={700}
+        height={700}
+        className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-500 ease-in-out group-hover:scale-105 group-hover:opacity-100"
+      />
+    )}
+  </div>
 
-        <button
+        {/* <button
           type="button"
           className="absolute top-3 right-3 z-10 flex h-8.5 w-8.5 items-center justify-center rounded-full bg-white/90 transition-transform"
         >
           <HeartIcon size={16} />
-        </button>
+        </button> */}
 
         {/* Desktop */}
         <div className="absolute right-0 bottom-0 left-0 z-10 hidden justify-center p-3 opacity-0 transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] group-hover:translate-y-0 group-hover:opacity-100 md:flex md:translate-y-full">

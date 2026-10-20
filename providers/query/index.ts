@@ -32,3 +32,26 @@ export async function authQuery(url:string) {
 
   return res.json();
 }
+
+export async function getCustomizatioons() {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/customizations`
+  );
+  if (!res.ok) {
+    throw new Error("Failed to fetch products");
+  }
+
+  return res.json();
+}
+
+export async function getGallery() {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/gallery`
+  );
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch gallery");
+  }
+
+  return res.json();
+}

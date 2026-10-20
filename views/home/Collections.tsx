@@ -26,17 +26,22 @@ const Collections = ({ data }: CollectionResponse) => {
             </div>
 
             <h2 className="font-display text-[clamp(32px,4vw,56px)] font-bold leading-[1.1] tracking-[-0.01em] text-off-white">
-            <ScrollTypewriter text={"Shop by Style"} />
+              <ScrollTypewriter text={"Shop by Style"} />
             </h2>
           </div>
 
-          <button className="btn-outline-white">View All</button>
+          <Link href={"/product"} className="btn-outline-white">View All</Link>
         </div>
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
           {categories?.slice(0, 5).map((cat: Collection) => (
-            <button
+            // <button
+            //   key={cat.id}
+            //   className="img-zoom group relative aspect-3/4 overflow-hidden rounded-2xl p-0 text-left"
+            // >
+            <Link
               key={cat.id}
+              href={`product?collection=${cat.slug}`}
               className="img-zoom group relative aspect-3/4 overflow-hidden rounded-2xl p-0 text-left"
             >
               <img
@@ -53,15 +58,12 @@ const Collections = ({ data }: CollectionResponse) => {
                 <div className="font-display text-sm lg:text-[22px] font-semibold leading-[1.1] text-off-white">
                   {cat.name}
                 </div>
-                <Link
-                  href={`product?collection=${cat.slug}`}
-                  className="mt-2.5 cursor-pointer flex items-center gap-1.5 text-[11px] text-off-white/60"
-                >
-                  <span>Explore</span>
-                  <ArrowRight size={14} />
-                </Link>
+              <div className="flex items-center gap-1 text-[#ffffffb2] mt-1 text-sm">
+              <span>Explore</span>
+              <ArrowRight size={14} />
               </div>
-            </button>
+              </div>
+            </Link>
           ))}
         </div>
       </Container>
